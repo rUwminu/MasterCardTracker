@@ -51,6 +51,7 @@ namespace MasterCardTracker
             this.dateTimePicker1.Name = "dateTimePicker1";
             this.dateTimePicker1.Size = new System.Drawing.Size(200, 24);
             this.dateTimePicker1.TabIndex = 0;
+            this.dateTimePicker1.ValueChanged += new System.EventHandler(this.dateTimePicker1_ValueChanged);
             // 
             // dgv1
             // 
@@ -65,10 +66,11 @@ namespace MasterCardTracker
             this.dgv1.Name = "dgv1";
             this.dgv1.Size = new System.Drawing.Size(695, 382);
             this.dgv1.TabIndex = 8;
+            this.dgv1.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv1_CellContentClick);
             // 
             // mastercard_no
             // 
-            this.mastercard_no.DataPropertyName = "womsno";
+            this.mastercard_no.DataPropertyName = "msno";
             this.mastercard_no.HeaderText = "MasterCard No";
             this.mastercard_no.Name = "mastercard_no";
             this.mastercard_no.ReadOnly = true;
@@ -85,6 +87,7 @@ namespace MasterCardTracker
             // ms_location
             // 
             this.ms_location.DataPropertyName = "mslocation";
+            this.ms_location.FillWeight = 90F;
             this.ms_location.HeaderText = "Last Deparment";
             this.ms_location.Name = "ms_location";
             this.ms_location.ReadOnly = true;
@@ -141,8 +144,9 @@ namespace MasterCardTracker
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(201, 51);
             this.button1.TabIndex = 12;
-            this.button1.Text = "Sort By Date And MasterCard No";
+            this.button1.Text = "Sort By Date And Workorder No";
             this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // label3
             // 
@@ -178,15 +182,15 @@ namespace MasterCardTracker
 
         private System.Windows.Forms.DateTimePicker dateTimePicker1;
         private System.Windows.Forms.DataGridView dgv1;
-        private System.Windows.Forms.DataGridViewTextBoxColumn mastercard_no;
-        private System.Windows.Forms.DataGridViewTextBoxColumn workorder_no;
-        private System.Windows.Forms.DataGridViewTextBoxColumn ms_location;
-        private System.Windows.Forms.DataGridViewTextBoxColumn his_datetime;
-        private System.Windows.Forms.DataGridViewTextBoxColumn status;
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.DataGridViewTextBoxColumn mastercard_no;
+        private System.Windows.Forms.DataGridViewTextBoxColumn workorder_no;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ms_location;
+        private System.Windows.Forms.DataGridViewTextBoxColumn his_datetime;
+        private System.Windows.Forms.DataGridViewTextBoxColumn status;
     }
 }
