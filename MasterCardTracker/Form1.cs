@@ -37,6 +37,7 @@ namespace MasterCardTracker
         {
             InitializeComponent();
 
+            
             conn = new MySqlConnection();
             conn.ConnectionString = "server=localhost;uid=root; pwd=CBS12345678.; database=demo; Convert Zero Datetime=True; Allow Zero Datetime=True; default command timeout=300; ";
         }
