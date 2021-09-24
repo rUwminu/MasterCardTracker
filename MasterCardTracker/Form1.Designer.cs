@@ -37,6 +37,10 @@ namespace MasterCardTracker
             this.label2 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.dgv1 = new System.Windows.Forms.DataGridView();
+            this.mastercard_no = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.workorder_no = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ms_location = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.his_datetime = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.timer2 = new System.Windows.Forms.Timer(this.components);
             this.label6 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
@@ -119,12 +123,41 @@ namespace MasterCardTracker
             this.mastercard_no,
             this.workorder_no,
             this.ms_location,
-            this.his_datetime,
-            this.status});
             this.dgv1.Location = new System.Drawing.Point(12, 164);
             this.dgv1.Name = "dgv1";
-            this.dgv1.Size = new System.Drawing.Size(695, 229);
             this.dgv1.TabIndex = 7;
+            // 
+            // mastercard_no
+            // 
+            this.mastercard_no.DataPropertyName = "womsno";
+            this.mastercard_no.HeaderText = "MasterCard No";
+            this.mastercard_no.Name = "mastercard_no";
+            this.mastercard_no.ReadOnly = true;
+            this.mastercard_no.Width = 130;
+            // 
+            // workorder_no
+            // 
+            this.workorder_no.DataPropertyName = "wono";
+            this.workorder_no.HeaderText = "WorkOrder No";
+            this.workorder_no.Name = "workorder_no";
+            this.workorder_no.ReadOnly = true;
+            this.workorder_no.Width = 130;
+            // 
+            // ms_location
+            // 
+            this.ms_location.DataPropertyName = "mslocation";
+            this.ms_location.HeaderText = "Last Deparment";
+            this.ms_location.Name = "ms_location";
+            this.ms_location.ReadOnly = true;
+            this.ms_location.Width = 130;
+            // 
+            // his_datetime
+            // 
+            this.his_datetime.DataPropertyName = "msdate";
+            this.his_datetime.HeaderText = "Date Time";
+            this.his_datetime.Name = "his_datetime";
+            this.his_datetime.ReadOnly = true;
+            this.his_datetime.Width = 160;
             // 
             // timer2
             // 
@@ -240,7 +273,6 @@ namespace MasterCardTracker
             this.Controls.Add(this.label1);
             this.Controls.Add(this.textBox1);
             this.Name = "Form1";
-            this.Text = "View History";
             ((System.ComponentModel.ISupportInitialize)(this.dgv1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -256,6 +288,10 @@ namespace MasterCardTracker
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.DataGridView dgv1;
+        private System.Windows.Forms.DataGridViewTextBoxColumn mastercard_no;
+        private System.Windows.Forms.DataGridViewTextBoxColumn workorder_no;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ms_location;
+        private System.Windows.Forms.DataGridViewTextBoxColumn his_datetime;
         private System.Windows.Forms.Timer timer2;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label7;

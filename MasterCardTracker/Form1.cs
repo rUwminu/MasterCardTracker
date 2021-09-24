@@ -25,10 +25,8 @@ namespace MasterCardTracker
         // This change according to user department, change depend on different user login
         // Example user is cutting department
         // string initialstate = "Master";
-        // string initialstate = "Extrusion";
         //string initialstate = "Printing";
         // string initialstate = "Cutting";
-        string initialstate = "Final";
 
         static int VALIDATION_DELAY = 1500;
         System.Threading.Timer timer = null;
@@ -42,12 +40,9 @@ namespace MasterCardTracker
             conn.ConnectionString = "server=localhost;uid=root; pwd=CBS12345678.; database=demo; Convert Zero Datetime=True; Allow Zero Datetime=True; default command timeout=300; ";
         }
 
-        public async void saveScanHis(string WOid, string MSid, string location, string status)
         {
             // Delay This task for last task to complete sql read and connection to close *Testing Beta
-            await Task.Delay(TimeSpan.FromSeconds(3));
 
-            string insertinfo = "INSERT INTO demo.masterc_record(mcr_no, mcr_wo_no, mcr_location, mcr_datetime, mcr_status) VALUES (@mcr_no, @mcr_wo_no, @mcr_location, @mcr_datetime, @mcr_status)";
 
             conn.Open();
 
@@ -55,7 +50,6 @@ namespace MasterCardTracker
 
             upcmd.Parameters.AddWithValue("@mcr_no", MSid);
             upcmd.Parameters.AddWithValue("@mcr_wo_no", WOid);
-            upcmd.Parameters.AddWithValue("@mcr_location", location);
             upcmd.Parameters.AddWithValue("@mcr_datetime", dateTime.ToString("yyyy-MM-dd hh:mm:ss"));
             upcmd.Parameters.AddWithValue("@mcr_status", status);
 
@@ -69,7 +63,6 @@ namespace MasterCardTracker
             return;
         }
 
-        private async void getWOData(string query)
         {
             try
             {
@@ -79,13 +72,11 @@ namespace MasterCardTracker
 
                 using (MySqlDataReader reader = cmd.ExecuteReader())
                 {
-                    if (reader.HasRows)
                     {
                         while (reader.Read())
                         {
                             string msid = reader[3].ToString();
                             string woid = reader[2].ToString();
-                            string lastlocation = reader[1].ToString(); // take this to record check out function
                             string proccessStep = reader[4].ToString();
                             string msStatus = reader[5].ToString(); // **Not in use yet**
                             label4.Text = msid;
@@ -108,14 +99,10 @@ namespace MasterCardTracker
                                     label3.ForeColor = System.Drawing.Color.Red;
                                     label4.Text = msid;
 
-                                    // Delay the saving process for checking,, simple way to structure history record                                  
-                                    saveScanHis(woid, msid, initialstate, "IN");
-                                    saveScanHis(woid, msid, lastlocation, "OUT");
 
                                     return;
                                 }
                             }
-                            else if (initialstate == "Extrusion" )
                             {
                                 // This if/else check the mastercard last location and compare with current location to let user know is mastercard here or will update to here
                                 if (msid != "" && lastlocation == initialstate)
@@ -131,13 +118,10 @@ namespace MasterCardTracker
                                     label3.ForeColor = System.Drawing.Color.Red;
                                     label4.Text = msid;
 
-                                    saveScanHis(woid, msid, initialstate, "IN");
-                                    saveScanHis(woid, msid, lastlocation, "OUT");
 
                                     return;
                                 }
                             }
-                            else if (initialstate == "Printing" )
                             {
                                 if (msid != "" && lastlocation == initialstate)
                                 {
@@ -152,13 +136,10 @@ namespace MasterCardTracker
                                     label3.ForeColor = System.Drawing.Color.Red;
                                     label4.Text = msid;
 
-                                    saveScanHis(woid, msid, initialstate, "IN");
-                                    saveScanHis(woid, msid, lastlocation, "OUT");
 
                                     return;
                                 }
                             }
-                            else if (initialstate == "Cutting" )
                             {
                                 if (msid != "" && lastlocation == initialstate)
                                 {
@@ -173,8 +154,6 @@ namespace MasterCardTracker
                                     label3.ForeColor = System.Drawing.Color.Red;
                                     label4.Text = msid;
 
-                                    saveScanHis(woid, msid, initialstate, "IN");
-                                    saveScanHis(woid, msid, lastlocation, "OUT");
 
                                     return;
                                 }
@@ -272,24 +251,22 @@ namespace MasterCardTracker
         {
             this.Invoke(new Action(() =>
             {
-                if (textBox1.Text != "")
-                {
-                    string woallsql = "SELECT demo.masterc_record.mcr_no, demo.masterc_record.mcr_location, demo.workorder.id, demo.workorder.WO_master, demo.workorder.WO_proccess, demo.masterc_record.mcr_status " +
-                                      "FROM demo.workorder " +
-                                      "LEFT JOIN demo.masterc_record ON demo.workorder.WO_master = demo.masterc_record.mcr_no " +
-                                      "WHERE demo.workorder.id = '" + textBox1.Text + "' " +
-                                      "ORDER BY demo.masterc_record.id DESC";
+            if (textBox1.Text != "")
+            {
+                                  "FROM demo.workorder " +
+                                  "LEFT JOIN demo.masterc_record ON demo.workorder.WO_master = demo.masterc_record.mcr_no " +
+                                  "WHERE demo.workorder.id = '" + textBox1.Text + "' " +
+                                  "ORDER BY demo.masterc_record.id DESC";
 
-                    getWOData(woallsql);
-                    loaddata();
-                }
+                getWOData(woallsql);
+                loaddata();
             }
+        }
             ));
         }
 
         public void loaddata()
         {
-            string woallsql2 = "SELECT demo.workorder.id AS wono, demo.workorder.WO_master AS womsno, demo.masterc_record.mcr_location AS mslocation, demo.masterc_record.mcr_datetime AS msdate, demo.masterc_record.mcr_status as msstatus " +
                                   "FROM demo.workorder " +
                                   "LEFT JOIN demo.masterc_record ON demo.workorder.WO_master = demo.masterc_record.mcr_no " +
                                   "WHERE demo.workorder.id = '" + textBox1.Text + "' " +
