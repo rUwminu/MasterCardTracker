@@ -24,10 +24,10 @@ namespace MasterCardTracker
 
         // This change according to user department, change depend on different user login
         // Example user is cutting department
-         //string initialstate = "Extrusion";
-        string initialstate = "Printing";
+         string initialstate = "Extrusion";
+        // string initialstate = "Printing";
         // string initialstate = "Cutting";
-         // string initialstate = "Final";
+        // string initialstate = "Final";
 
         static int VALIDATION_DELAY = 1500;
         System.Threading.Timer timer = null;
@@ -41,13 +41,21 @@ namespace MasterCardTracker
             conn.ConnectionString = "server=localhost;uid=root; pwd=CBS12345678.; database=plastic; Convert Zero Datetime=True; Allow Zero Datetime=True; default command timeout=300; ";
         }
 
-        private async void saveHistory(string MSid, string WOid, string location, string status)
+        //public async void stepSaving(string MSid, string WOid, string lastlocation, string initialstate)
+        //{
+        //    await Task.Run(() =>
+        //    {
+        //        saveHistory(MSid, WOid, lastlocation, "OUT");           
+        //    });
+        //    saveHistory(MSid, WOid, initialstate, "IN");
+        //}
+
+        private async void saveHistory(string MSid, string WOid, string location, string status, int delay)
         {
             // Delay This task for last task to complete sql read and connection to close *Testing Beta
-            await Task.Delay(3000);
+            await Task.Delay(delay);
 
             string insertinfo = "INSERT INTO plastic.masterc_record(mcr_no, mcr_wo_no, mcr_location, mcr_datetime, mcr_status) VALUES (@mcr_no, @mcr_wo_no, @mcr_location, @mcr_datetime, @mcr_status)";
-
 
             conn.Open();
 
@@ -68,8 +76,11 @@ namespace MasterCardTracker
 
             return;
         }
-        private void getWOData (string query)
-    {
+        private async void getWOData (string query)
+        {
+            var splitted = textBox1.Text.Split('-');
+            string pono = splitted[0];
+
             try
             {
                 cmd = new MySqlCommand(query, conn);
@@ -78,7 +89,7 @@ namespace MasterCardTracker
 
                 using (MySqlDataReader reader = cmd.ExecuteReader())
                 {
-                    if(reader.HasRows){
+                    if (reader.HasRows){
                         while (reader.Read())
                         {
                             string msid = reader[3].ToString();
@@ -93,7 +104,7 @@ namespace MasterCardTracker
                             //This if/else check user department and the posible Workorder can pass to this user deparment
                             if (initialstate == "Final")
                             {
-                                if (msid != "" && lastlocation == initialstate)
+                                if (msid != "" && lastlocation == initialstate && pono == woid)
                                 {
                                     label3.Text = "MasterCard Already Here.";
                                     label3.ForeColor = System.Drawing.Color.Green;                                    
@@ -106,9 +117,9 @@ namespace MasterCardTracker
                                     label3.ForeColor = System.Drawing.Color.Red;
                                     label4.Text = msid;
 
-                                    saveHistory(msid, woid, lastlocation, "OUT");
-                                    saveHistory(msid, woid, initialstate, "IN");
-                                    
+                                    //stepSaving(msid, woid, lastlocation, initialstate);
+                                    saveHistory(msid, woid, lastlocation, "OUT", 2000);                                   
+                                    saveHistory(msid, woid, initialstate, "IN", 4000);
 
                                     return;
                                 }
@@ -116,7 +127,7 @@ namespace MasterCardTracker
                             else if (initialstate == "Extrusion")
                             {
                                 // This if/else check the mastercard last location and compare with current location to let user know is mastercard here or will update to here
-                                if (msid != "" && lastlocation == initialstate)
+                                if (msid != "" && lastlocation == initialstate && pono == woid)
                                 {
                                     label3.Text = "MasterCard Already Here.";
                                     label3.ForeColor = System.Drawing.Color.Green;
@@ -129,16 +140,15 @@ namespace MasterCardTracker
                                     label3.ForeColor = System.Drawing.Color.Red;
                                     label4.Text = msid;
 
-                                    saveHistory(msid, woid, lastlocation, "OUT");
-                                    saveHistory(msid, woid, initialstate, "IN");
-                                    
+                                    saveHistory(msid, woid, lastlocation, "OUT", 2000);
+                                    saveHistory(msid, woid, initialstate, "IN", 4000);
 
                                     return;
                                 }
                             }
                             else if (initialstate == "Printing")
                             {
-                                if (msid != "" && lastlocation == initialstate)
+                                if (msid != "" && lastlocation == initialstate && pono == woid)
                                 {
                                     label3.Text = "MasterCard Already Here.";
                                     label3.ForeColor = System.Drawing.Color.Green;
@@ -151,16 +161,13 @@ namespace MasterCardTracker
                                     label3.ForeColor = System.Drawing.Color.Red;
                                     label4.Text = msid;
 
-                                    saveHistory(msid, woid, lastlocation, "OUT");
-                                    saveHistory(msid, woid, initialstate, "IN");
-                                    
-
-                                    return;
+                                    saveHistory(msid, woid, lastlocation, "OUT", 2000);
+                                    saveHistory(msid, woid, initialstate, "IN", 4000);
                                 }
                             }
                             else if (initialstate == "Cutting")
                             {
-                                if (msid != "" && lastlocation == initialstate)
+                                if (msid != "" && lastlocation == initialstate && pono == woid)
                                 {
                                     label3.Text = "MasterCard Already Here.";
                                     label3.ForeColor = System.Drawing.Color.Green;
@@ -173,9 +180,8 @@ namespace MasterCardTracker
                                     label3.ForeColor = System.Drawing.Color.Red;
                                     label4.Text = msid;
 
-                                    saveHistory(msid, woid, lastlocation, "OUT");
-                                    saveHistory(msid, woid, initialstate, "IN");
-                                    
+                                    saveHistory(msid, woid, lastlocation, "OUT", 2000);
+                                    saveHistory(msid, woid, initialstate, "IN", 4000);
 
                                     return;
                                 }
@@ -262,7 +268,7 @@ namespace MasterCardTracker
         {
             this.Invoke(new Action(() =>
             {
-                if (textBox1.Text != "")
+                if (textBox1.Text != "" )
                 {
                     try
                     {
@@ -270,23 +276,49 @@ namespace MasterCardTracker
                         string pono = splitted[0];
                         string item = splitted[1];
 
-                        string woallsql2 = "SELECT plastic.masterc_record.mcr_no, plastic.masterc_record.mcr_location, plastic.wo.ID, plastic.woitem.mascId, plastic.masterc_record.mcr_status " +
-                                          "FROM plastic.wo " +
-                                          "LEFT JOIN plastic.masterc_record ON plastic.wo.MASCID = plastic.masterc_record.mcr_no " +
-                                          "LEFT JOIN plastic.woitem ON plastic.wo.ID = plastic.woitem.woID AND plastic.woitem.item = '" + item + "' " +
-                                          "WHERE plastic.wo.ID = '" + pono + "' " +
-                                          "ORDER BY plastic.masterc_record.id DESC";
+                        timer.Dispose();
 
-                        getWOData(woallsql2);
-                        loaddata(pono);
+                        if(initialstate != "Extrusion")
+                        {
+                            DialogResult dialogResult = MessageBox.Show("Is the MasterCard with the Workorder?", "Comfirmation", MessageBoxButtons.YesNo);
+                            if (dialogResult == DialogResult.Yes)
+                            {
+                                string woallsql2 = "SELECT plastic.masterc_record.mcr_no, plastic.masterc_record.mcr_location, plastic.wo.ID, plastic.woitem.mascId, plastic.masterc_record.mcr_status " +
+                                                  "FROM plastic.wo " +
+                                                  "LEFT JOIN plastic.masterc_record ON plastic.wo.MASCID = plastic.masterc_record.mcr_no " +
+                                                  "LEFT JOIN plastic.woitem ON plastic.wo.ID = plastic.woitem.woID " +
+                                                  "WHERE plastic.wo.ID = '" + pono + "' " +
+                                                  "ORDER BY plastic.masterc_record.id DESC";
+
+                                getWOData(woallsql2);
+                                loaddata(pono);
+                            }
+                            else if (dialogResult == DialogResult.No)
+                            {
+                                loaddata(pono);
+                            }
+                        } else if (initialstate == "Extrusion")
+                        {
+                            string woallsql2 = "SELECT plastic.masterc_record.mcr_no, plastic.masterc_record.mcr_location, plastic.wo.ID, plastic.woitem.mascId, plastic.masterc_record.mcr_status " +
+                                                  "FROM plastic.wo " +
+                                                  "LEFT JOIN plastic.masterc_record ON plastic.wo.MASCID = plastic.masterc_record.mcr_no " +
+                                                  "LEFT JOIN plastic.woitem ON plastic.wo.ID = plastic.woitem.woID " +
+                                                  "WHERE plastic.wo.ID = '" + pono + "' " +
+                                                  "ORDER BY plastic.masterc_record.id DESC";
+
+                            getWOData(woallsql2);
+                            loaddata(pono);
+                        }  
                     }
                     catch (Exception ex)
                     {
+                        timer.Dispose();
                         MessageBox.Show(string.Format("An error occurred {0}", ex.Message), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
             }
             ));
+
         }
 
         public void loaddata(string pono)
@@ -306,18 +338,6 @@ namespace MasterCardTracker
 
         }
 
-        private void timer2_Tick(object sender, EventArgs e)
-        {
-            var splitted = textBox1.Text.Split('-');
-            string pono = splitted[0];
-            //string item = splitted[1];
-
-            if (textBox1.Text != "")
-            {
-                loaddata(pono);
-            } 
-        }
-
         private void label2_Click(object sender, EventArgs e)
         {
 
@@ -327,6 +347,18 @@ namespace MasterCardTracker
         {
             Form2 frm = new Form2(this);
             frm.Show();
+        }
+
+        private void timer2_Tick_1(object sender, EventArgs e)
+        {
+            var splitted = textBox1.Text.Split('-');
+            string pono = splitted[0];
+            //string item = splitted[1];
+
+            if (textBox1.Text != "")
+            {
+                loaddata(pono);
+            }
         }
     }
 }

@@ -37,17 +37,18 @@ namespace MasterCardTracker
             this.label2 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.dgv1 = new System.Windows.Forms.DataGridView();
+            this.mastercard = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.wono = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.location = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.datatime = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.status = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.timer2 = new System.Windows.Forms.Timer(this.components);
             this.label6 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
             this.button1 = new System.Windows.Forms.Button();
-            this.mastercard = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.wono = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.location = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.datatime = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.status = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.label10 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dgv1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -125,9 +126,50 @@ namespace MasterCardTracker
             this.dgv1.Size = new System.Drawing.Size(665, 249);
             this.dgv1.TabIndex = 13;
             // 
+            // mastercard
+            // 
+            this.mastercard.DataPropertyName = "msno";
+            this.mastercard.HeaderText = "MasterCard No";
+            this.mastercard.Name = "mastercard";
+            this.mastercard.ReadOnly = true;
+            this.mastercard.Width = 150;
+            // 
+            // wono
+            // 
+            this.wono.DataPropertyName = "wono";
+            this.wono.HeaderText = "WorkerOrder No";
+            this.wono.Name = "wono";
+            this.wono.ReadOnly = true;
+            this.wono.Width = 150;
+            // 
+            // location
+            // 
+            this.location.DataPropertyName = "mslocation";
+            this.location.HeaderText = "Last Location";
+            this.location.Name = "location";
+            this.location.ReadOnly = true;
+            this.location.Width = 110;
+            // 
+            // datatime
+            // 
+            this.datatime.DataPropertyName = "msdate";
+            this.datatime.HeaderText = "Date";
+            this.datatime.Name = "datatime";
+            this.datatime.ReadOnly = true;
+            this.datatime.Width = 110;
+            // 
+            // status
+            // 
+            this.status.DataPropertyName = "msstatus";
+            this.status.HeaderText = "Status";
+            this.status.Name = "status";
+            this.status.ReadOnly = true;
+            // 
             // timer2
             // 
             this.timer2.Enabled = true;
+            this.timer2.Interval = 5000;
+            this.timer2.Tick += new System.EventHandler(this.timer2_Tick_1);
             // 
             // label6
             // 
@@ -180,50 +222,21 @@ namespace MasterCardTracker
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
-            // mastercard
+            // label10
             // 
-            this.mastercard.DataPropertyName = "msno";
-            this.mastercard.HeaderText = "MasterCard No";
-            this.mastercard.Name = "mastercard";
-            this.mastercard.ReadOnly = true;
-            this.mastercard.Width = 150;
-            // 
-            // wono
-            // 
-            this.wono.DataPropertyName = "wono";
-            this.wono.HeaderText = "WorkerOrder No";
-            this.wono.Name = "wono";
-            this.wono.ReadOnly = true;
-            this.wono.Width = 150;
-            // 
-            // location
-            // 
-            this.location.DataPropertyName = "mslocation";
-            this.location.HeaderText = "Last Location";
-            this.location.Name = "location";
-            this.location.ReadOnly = true;
-            this.location.Width = 110;
-            // 
-            // datatime
-            // 
-            this.datatime.DataPropertyName = "msdate";
-            this.datatime.HeaderText = "Date";
-            this.datatime.Name = "datatime";
-            this.datatime.ReadOnly = true;
-            this.datatime.Width = 110;
-            // 
-            // status
-            // 
-            this.status.DataPropertyName = "msstatus";
-            this.status.HeaderText = "Status";
-            this.status.Name = "status";
-            this.status.ReadOnly = true;
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(709, 99);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(41, 13);
+            this.label10.TabIndex = 14;
+            this.label10.Text = "label10";
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 405);
+            this.Controls.Add(this.label10);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.label9);
             this.Controls.Add(this.label8);
@@ -266,6 +279,7 @@ namespace MasterCardTracker
         private System.Windows.Forms.DataGridViewTextBoxColumn location;
         private System.Windows.Forms.DataGridViewTextBoxColumn datatime;
         private System.Windows.Forms.DataGridViewTextBoxColumn status;
+        private System.Windows.Forms.Label label10;
     }
 }
 
