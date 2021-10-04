@@ -24,8 +24,8 @@ namespace MasterCardTracker
 
         // This change according to user department, change depend on different user login
         // Example user is cutting department
-         string initialstate = "Extrusion";
-        // string initialstate = "Printing";
+        // string initialstate = "Extrusion";
+         string initialstate = "Printing";
         // string initialstate = "Cutting";
         // string initialstate = "Final";
 
@@ -118,8 +118,8 @@ namespace MasterCardTracker
                                     label4.Text = msid;
 
                                     //stepSaving(msid, woid, lastlocation, initialstate);
-                                    saveHistory(msid, woid, lastlocation, "OUT", 2000);                                   
-                                    saveHistory(msid, woid, initialstate, "IN", 4000);
+                                    saveHistory(msid, woid, lastlocation, "OUT", 3000);                                   
+                                    saveHistory(msid, woid, initialstate, "IN", 5000);
 
                                     return;
                                 }
@@ -161,8 +161,8 @@ namespace MasterCardTracker
                                     label3.ForeColor = System.Drawing.Color.Red;
                                     label4.Text = msid;
 
-                                    saveHistory(msid, woid, lastlocation, "OUT", 2000);
-                                    saveHistory(msid, woid, initialstate, "IN", 4000);
+                                    saveHistory(msid, woid, lastlocation, "OUT", 3000);
+                                    saveHistory(msid, woid, initialstate, "IN", 5000);
                                 }
                             }
                             else if (initialstate == "Cutting")
@@ -180,8 +180,8 @@ namespace MasterCardTracker
                                     label3.ForeColor = System.Drawing.Color.Red;
                                     label4.Text = msid;
 
-                                    saveHistory(msid, woid, lastlocation, "OUT", 2000);
-                                    saveHistory(msid, woid, initialstate, "IN", 4000);
+                                    saveHistory(msid, woid, lastlocation, "OUT", 3000);
+                                    saveHistory(msid, woid, initialstate, "IN", 5000);
 
                                     return;
                                 }
@@ -278,37 +278,50 @@ namespace MasterCardTracker
 
                         timer.Dispose();
 
-                        if(initialstate != "Extrusion")
-                        {
-                            DialogResult dialogResult = MessageBox.Show("Is the MasterCard with the Workorder?", "Comfirmation", MessageBoxButtons.YesNo);
-                            if (dialogResult == DialogResult.Yes)
-                            {
-                                string woallsql2 = "SELECT plastic.masterc_record.mcr_no, plastic.masterc_record.mcr_location, plastic.wo.ID, plastic.woitem.mascId, plastic.masterc_record.mcr_status " +
+                        // Window prompt on each workorder scan
+                        //if(initialstate != "Extrusion")
+                        //{
+                        //    DialogResult dialogResult = MessageBox.Show("Is the MasterCard with the Workorder?", "Comfirmation", MessageBoxButtons.YesNo);
+                        //    if (dialogResult == DialogResult.Yes)
+                        //    {
+                        //        string woallsql2 = "SELECT plastic.masterc_record.mcr_no, plastic.masterc_record.mcr_location, plastic.wo.ID, plastic.woitem.mascId, plastic.masterc_record.mcr_status " +
+                        //                          "FROM plastic.wo " +
+                        //                          "LEFT JOIN plastic.masterc_record ON plastic.wo.MASCID = plastic.masterc_record.mcr_no " +
+                        //                          "LEFT JOIN plastic.woitem ON plastic.wo.ID = plastic.woitem.woID " +
+                        //                          "WHERE plastic.wo.ID = '" + pono + "' " +
+                        //                          "ORDER BY plastic.masterc_record.id DESC";
+
+                        //        getWOData(woallsql2);
+                        //        loaddata(pono);
+                        //    }
+                        //    else if (dialogResult == DialogResult.No)
+                        //    {
+                        //        loaddata(pono);
+                        //    }
+                        //} else if (initialstate == "Extrusion")
+                        //{
+                        //    string woallsql2 = "SELECT plastic.masterc_record.mcr_no, plastic.masterc_record.mcr_location, plastic.wo.ID, plastic.woitem.mascId, plastic.masterc_record.mcr_status " +
+                        //                          "FROM plastic.wo " +
+                        //                          "LEFT JOIN plastic.masterc_record ON plastic.wo.MASCID = plastic.masterc_record.mcr_no " +
+                        //                          "LEFT JOIN plastic.woitem ON plastic.wo.ID = plastic.woitem.woID " +
+                        //                          "WHERE plastic.wo.ID = '" + pono + "' " +
+                        //                          "ORDER BY plastic.masterc_record.id DESC";
+
+                        //    getWOData(woallsql2);
+                        //    loaddata(pono);
+                        //}
+                        //
+
+                        // Workorder scan, record mastercard location.
+                        string woallsql2 = "SELECT plastic.masterc_record.mcr_no, plastic.masterc_record.mcr_location, plastic.wo.ID, plastic.woitem.mascId, plastic.masterc_record.mcr_status " +
                                                   "FROM plastic.wo " +
                                                   "LEFT JOIN plastic.masterc_record ON plastic.wo.MASCID = plastic.masterc_record.mcr_no " +
                                                   "LEFT JOIN plastic.woitem ON plastic.wo.ID = plastic.woitem.woID " +
                                                   "WHERE plastic.wo.ID = '" + pono + "' " +
                                                   "ORDER BY plastic.masterc_record.id DESC";
 
-                                getWOData(woallsql2);
-                                loaddata(pono);
-                            }
-                            else if (dialogResult == DialogResult.No)
-                            {
-                                loaddata(pono);
-                            }
-                        } else if (initialstate == "Extrusion")
-                        {
-                            string woallsql2 = "SELECT plastic.masterc_record.mcr_no, plastic.masterc_record.mcr_location, plastic.wo.ID, plastic.woitem.mascId, plastic.masterc_record.mcr_status " +
-                                                  "FROM plastic.wo " +
-                                                  "LEFT JOIN plastic.masterc_record ON plastic.wo.MASCID = plastic.masterc_record.mcr_no " +
-                                                  "LEFT JOIN plastic.woitem ON plastic.wo.ID = plastic.woitem.woID " +
-                                                  "WHERE plastic.wo.ID = '" + pono + "' " +
-                                                  "ORDER BY plastic.masterc_record.id DESC";
-
-                            getWOData(woallsql2);
-                            loaddata(pono);
-                        }  
+                        getWOData(woallsql2);
+                        loaddata(pono);
                     }
                     catch (Exception ex)
                     {
