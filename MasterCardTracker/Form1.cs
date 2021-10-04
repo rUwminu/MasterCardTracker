@@ -24,10 +24,10 @@ namespace MasterCardTracker
 
         // This change according to user department, change depend on different user login
         // Example user is cutting department
-        // string initialstate = "Extrusion";
-        //string initialstate = "Printing";
+         //string initialstate = "Extrusion";
+        string initialstate = "Printing";
         // string initialstate = "Cutting";
-         string initialstate = "Final";
+         // string initialstate = "Final";
 
         static int VALIDATION_DELAY = 1500;
         System.Threading.Timer timer = null;
@@ -38,14 +38,15 @@ namespace MasterCardTracker
 
             
             conn = new MySqlConnection();
-            conn.ConnectionString = "server=localhost;uid=root; pwd=CBS12345678.; database=demo; Convert Zero Datetime=True; Allow Zero Datetime=True; default command timeout=300; ";
+            conn.ConnectionString = "server=localhost;uid=root; pwd=CBS12345678.; database=plastic; Convert Zero Datetime=True; Allow Zero Datetime=True; default command timeout=300; ";
         }
+
         private async void saveHistory(string MSid, string WOid, string location, string status)
         {
             // Delay This task for last task to complete sql read and connection to close *Testing Beta
             await Task.Delay(3000);
 
-            string insertinfo = "INSERT INTO demo.masterc_record(mcr_no, mcr_wo_no, mcr_location, mcr_datetime, mcr_status) VALUES (@mcr_no, @mcr_wo_no, @mcr_location, @mcr_datetime, @mcr_status)";
+            string insertinfo = "INSERT INTO plastic.masterc_record(mcr_no, mcr_wo_no, mcr_location, mcr_datetime, mcr_status) VALUES (@mcr_no, @mcr_wo_no, @mcr_location, @mcr_datetime, @mcr_status)";
 
 
             conn.Open();
@@ -84,7 +85,7 @@ namespace MasterCardTracker
                             string woid = reader[2].ToString();
                             string lastlocation = reader[1].ToString();
                             string proccessStep = reader[4].ToString();
-                            string msStatus = reader[5].ToString(); // **Not in use yet**
+                            //string msStatus = reader[5].ToString(); // **Not in use yet**
                             label4.Text = msid;
                             label6.Text = lastlocation;
                             label9.Text = proccessStep;
@@ -105,8 +106,9 @@ namespace MasterCardTracker
                                     label3.ForeColor = System.Drawing.Color.Red;
                                     label4.Text = msid;
 
-                                    saveHistory(msid, woid, initialstate, "IN");
                                     saveHistory(msid, woid, lastlocation, "OUT");
+                                    saveHistory(msid, woid, initialstate, "IN");
+                                    
 
                                     return;
                                 }
@@ -127,8 +129,9 @@ namespace MasterCardTracker
                                     label3.ForeColor = System.Drawing.Color.Red;
                                     label4.Text = msid;
 
-                                    saveHistory(msid, woid, initialstate, "IN");
                                     saveHistory(msid, woid, lastlocation, "OUT");
+                                    saveHistory(msid, woid, initialstate, "IN");
+                                    
 
                                     return;
                                 }
@@ -148,8 +151,9 @@ namespace MasterCardTracker
                                     label3.ForeColor = System.Drawing.Color.Red;
                                     label4.Text = msid;
 
-                                    saveHistory(msid, woid, initialstate, "IN");
                                     saveHistory(msid, woid, lastlocation, "OUT");
+                                    saveHistory(msid, woid, initialstate, "IN");
+                                    
 
                                     return;
                                 }
@@ -169,8 +173,9 @@ namespace MasterCardTracker
                                     label3.ForeColor = System.Drawing.Color.Red;
                                     label4.Text = msid;
 
-                                    saveHistory(msid, woid, initialstate, "IN");
                                     saveHistory(msid, woid, lastlocation, "OUT");
+                                    saveHistory(msid, woid, initialstate, "IN");
+                                    
 
                                     return;
                                 }
@@ -191,7 +196,8 @@ namespace MasterCardTracker
             catch (Exception ex)
             {
                 MessageBox.Show(string.Format("An error occurred {0}", ex.Message), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            } finally
+            }
+            finally
             {
                 conn.Close();
             }
@@ -229,18 +235,6 @@ namespace MasterCardTracker
 
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
-            //if (textBox1.Text != "")
-            //{
-            //    string woallsql = "SELECT demo.masterc_record.mcr_no, demo.masterc_record.mcr_location, demo.workorder.id, demo.workorder.WO_master, demo.workorder.WO_proccess, demo.masterc_record.mcr_status " +
-            //                      "FROM demo.workorder " +
-            //                      "LEFT JOIN demo.masterc_record ON demo.workorder.WO_master = demo.masterc_record.mcr_no " +
-            //                      "WHERE demo.workorder.id = '" + textBox1.Text + "' " +
-            //                      "ORDER BY demo.masterc_record.id DESC";
-
-            //    getWOData(woallsql);
-            //    loaddata();
-            //}
-
             TextBox origin = sender as TextBox;
             if (!origin.ContainsFocus)
                 return;
@@ -270,26 +264,39 @@ namespace MasterCardTracker
             {
                 if (textBox1.Text != "")
                 {
-                    string woallsql = "SELECT demo.masterc_record.mcr_no, demo.masterc_record.mcr_location, demo.workorder.id, demo.workorder.WO_master, demo.workorder.WO_proccess, demo.masterc_record.mcr_status " +
-                                      "FROM demo.workorder " +
-                                      "LEFT JOIN demo.masterc_record ON demo.workorder.WO_master = demo.masterc_record.mcr_no " +
-                                      "WHERE demo.workorder.id = '" + textBox1.Text + "' " +
-                                      "ORDER BY demo.masterc_record.id DESC";
+                    try
+                    {
+                        var splitted = textBox1.Text.Split('-');
+                        string pono = splitted[0];
+                        string item = splitted[1];
 
-                    getWOData(woallsql);
-                    loaddata();
+                        string woallsql2 = "SELECT plastic.masterc_record.mcr_no, plastic.masterc_record.mcr_location, plastic.wo.ID, plastic.woitem.mascId, plastic.masterc_record.mcr_status " +
+                                          "FROM plastic.wo " +
+                                          "LEFT JOIN plastic.masterc_record ON plastic.wo.MASCID = plastic.masterc_record.mcr_no " +
+                                          "LEFT JOIN plastic.woitem ON plastic.wo.ID = plastic.woitem.woID AND plastic.woitem.item = '" + item + "' " +
+                                          "WHERE plastic.wo.ID = '" + pono + "' " +
+                                          "ORDER BY plastic.masterc_record.id DESC";
+
+                        getWOData(woallsql2);
+                        loaddata(pono);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(string.Format("An error occurred {0}", ex.Message), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
                 }
             }
             ));
         }
 
-        public void loaddata()
+        public void loaddata(string pono)
         {
-            string woallsql = "SELECT demo.masterc_record.mcr_no as msno, demo.masterc_record.mcr_location as mslocation, demo.workorder.id as wono, demo.workorder.WO_master as womsno, demo.masterc_record.mcr_datetime as msdate, demo.masterc_record.mcr_status as msstatus " +
-                "FROM demo.workorder " +
-                "LEFT JOIN demo.masterc_record ON demo.workorder.WO_master = demo.masterc_record.mcr_no " +
-                "WHERE demo.workorder.id = '" + textBox1.Text + "' " +
-                "ORDER BY demo.masterc_record.id DESC";
+            // TODO change db string
+            string woallsql = "SELECT plastic.masterc_record.mcr_no as msno, plastic.masterc_record.mcr_location as mslocation, plastic.wo.id as wono, plastic.wo.MASCID as womsno, plastic.masterc_record.mcr_datetime as msdate, plastic.masterc_record.mcr_status as msstatus " +
+                "FROM plastic.wo " +
+                "LEFT JOIN plastic.masterc_record ON plastic.wo.MASCID = plastic.masterc_record.mcr_no " +
+                "WHERE plastic.wo.id = '" + pono + "' " +
+                "ORDER BY plastic.masterc_record.id DESC";
 
             getMSCHistory(woallsql);
         }
@@ -301,9 +308,13 @@ namespace MasterCardTracker
 
         private void timer2_Tick(object sender, EventArgs e)
         {
-            if(textBox1.Text != "")
+            var splitted = textBox1.Text.Split('-');
+            string pono = splitted[0];
+            //string item = splitted[1];
+
+            if (textBox1.Text != "")
             {
-                loaddata();
+                loaddata(pono);
             } 
         }
 

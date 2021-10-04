@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Configuration;
 using MySql.Data.MySqlClient;
 
 namespace MasterCardTracker
@@ -34,7 +35,7 @@ namespace MasterCardTracker
             dateTimePicker1.CustomFormat = "yyyy-MM-dd";
 
             conn = new MySqlConnection();
-            conn.ConnectionString = "server=localhost;uid=root; pwd=CBS12345678.; database=demo; Convert Zero Datetime=True; Allow Zero Datetime=True; default command timeout=300; ";
+            conn.ConnectionString = "server=localhost;uid=root; pwd=CBS12345678.; database=plastic; Convert Zero Datetime=True; Allow Zero Datetime=True; default command timeout=300; ";
         }
 
         private void Form2_Load(object sender, EventArgs e)
@@ -42,15 +43,49 @@ namespace MasterCardTracker
             GetAllHistory();
         }
 
+        public void getWoMasc (string query)
+        {
+            try
+            {
+                cmd = new MySqlCommand(query, conn);
+
+                conn.Open();
+
+                using (MySqlDataReader reader = cmd.ExecuteReader())
+                {
+                    if(reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            label3.Text = reader[0].ToString();
+                            GetByWOHistory(reader[0].ToString());
+                        }
+
+                    } else
+                    {
+                        label3.Text = "No Workorder with this id!";
+                    }
+                    reader.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(string.Format("An error occurred {0}", ex.Message), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                conn.Close();
+            }
+        }
+
         public void GetAllHistory ()
         {
             dt.Clear();
             dgv1.Refresh();
 
-            string woallsql = "SELECT demo.masterc_record.mcr_no as msno, demo.masterc_record.mcr_location as mslocation, demo.masterc_record.mcr_datetime as msdate, demo.workorder.id as wono, demo.masterc_record.mcr_status as msstatus " +
-                              "FROM demo.workorder " +
-                              "LEFT JOIN demo.masterc_record ON demo.workorder.WO_master = demo.masterc_record.mcr_no " +
-                              "ORDER BY demo.masterc_record.id DESC";
+            string woallsql = "SELECT plastic.masterc_record.mcr_no as msno, plastic.masterc_record.mcr_location as mslocation, plastic.masterc_record.mcr_datetime as msdate, plastic.masterc_record.mcr_wo_no as wono, plastic.masterc_record.mcr_status as msstatus " +
+                              "FROM plastic.masterc_record " +
+                              "ORDER BY plastic.masterc_record.id DESC";
                               
 
             cmd = new MySqlCommand(woallsql, conn);
@@ -68,16 +103,17 @@ namespace MasterCardTracker
             conn.Close();
         }
 
-        public void GetByWOHistory()
+        public async void GetByWOHistory(string masterNo)
         {
+            await Task.Delay(3000);
+
             dt.Clear();
             dgv1.Refresh();
 
-            string woallsql = "SELECT demo.masterc_record.mcr_no as msno, demo.masterc_record.mcr_location as mslocation, demo.masterc_record.mcr_datetime as msdate, demo.workorder.id as wono, demo.masterc_record.mcr_status as msstatus " +
-                              "FROM demo.workorder " +
-                              "LEFT JOIN demo.masterc_record ON demo.workorder.WO_master = demo.masterc_record.mcr_no " +
-                              "WHERE demo.workorder.id = '" + textBox1.Text + "' " +
-                              "ORDER BY demo.masterc_record.id DESC";
+            string woallsql = "SELECT plastic.masterc_record.mcr_no as msno, plastic.masterc_record.mcr_location as mslocation, plastic.masterc_record.mcr_datetime as msdate, plastic.masterc_record.mcr_wo_no as wono, plastic.masterc_record.mcr_status as msstatus " +
+                              "FROM plastic.masterc_record " +
+                              "WHERE plastic.masterc_record.mcr_no = '" + masterNo + "' " +
+                              "ORDER BY plastic.masterc_record.id DESC";
 
 
             cmd = new MySqlCommand(woallsql, conn);
@@ -100,11 +136,10 @@ namespace MasterCardTracker
             dt.Clear();
             dgv1.Refresh();
 
-            string woallsql = "SELECT demo.masterc_record.mcr_no as msno, demo.masterc_record.mcr_location as mslocation, demo.masterc_record.mcr_datetime as msdate, demo.workorder.id as wono, demo.masterc_record.mcr_status as msstatus " +
-                              "FROM demo.workorder " +
-                              "LEFT JOIN demo.masterc_record ON demo.workorder.WO_master = demo.masterc_record.mcr_no " +
-                              "WHERE DATE(demo.masterc_record.mcr_datetime) = '" + dateTimePicker1.Text + "' " +
-                              "ORDER BY demo.masterc_record.id DESC";
+            string woallsql = "SELECT plastic.masterc_record.mcr_no as msno, plastic.masterc_record.mcr_location as mslocation, plastic.masterc_record.mcr_datetime as msdate, plastic.masterc_record.mcr_wo_no as wono, plastic.masterc_record.mcr_status as msstatus " +
+                              "FROM plastic.masterc_record " +
+                              "WHERE DATE(plastic.masterc_record.mcr_datetime) = '" + dateTimePicker1.Text + "' " +
+                              "ORDER BY plastic.masterc_record.id DESC";
 
 
             cmd = new MySqlCommand(woallsql, conn);
@@ -127,11 +162,10 @@ namespace MasterCardTracker
             dt.Clear();
             dgv1.Refresh();
 
-            string woallsql = "SELECT demo.masterc_record.mcr_no as msno, demo.masterc_record.mcr_location as mslocation, demo.masterc_record.mcr_datetime as msdate, demo.masterc_record.mcr_wo_no as wono, demo.masterc_record.mcr_status as msstatus " +
-                              "FROM demo.workorder " +
-                              "LEFT JOIN demo.masterc_record ON demo.workorder.WO_master = demo.masterc_record.mcr_no " +
-                              "WHERE demo.masterc_record.mcr_wo_no = '" + textBox1.Text + "' AND DATE(demo.masterc_record.mcr_datetime) = '" + dateTimePicker1.Text + "' " +
-                              "ORDER BY demo.masterc_record.id DESC";
+            string woallsql = "SELECT plastic.masterc_record.mcr_no as msno, plastic.masterc_record.mcr_location as mslocation, plastic.masterc_record.mcr_datetime as msdate, plastic.masterc_record.mcr_wo_no as wono, plastic.masterc_record.mcr_status as msstatus " +
+                              "FROM plastic.masterc_record " +
+                              "WHERE plastic.masterc_record.mcr_no = '" + label3.Text + "' AND DATE(plastic.masterc_record.mcr_datetime) = '" + dateTimePicker1.Text + "' " +
+                              "ORDER BY plastic.masterc_record.id DESC";
 
 
             cmd = new MySqlCommand(woallsql, conn);
@@ -180,7 +214,14 @@ namespace MasterCardTracker
             {
                 if (textBox1.Text != "")
                 {
-                    GetByWOHistory();
+                    var splitted = textBox1.Text.Split('-');
+                    string pono = splitted[0];
+
+                    string woallsql2 = "SELECT plastic.wo.MASCID " +
+                                      "FROM plastic.wo " +
+                                      "WHERE plastic.wo.ID = '" + pono + "' ";
+
+                    getWoMasc(woallsql2);
                 }
             }
             ));
