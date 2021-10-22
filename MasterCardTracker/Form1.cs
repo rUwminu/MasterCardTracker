@@ -318,7 +318,7 @@ namespace MasterCardTracker
                                            "LEFT JOIN plastic.masterc_record ON plastic.wo.MASCID = plastic.masterc_record.mcr_no " +
                                            "LEFT JOIN plastic.woitem ON plastic.wo.ID = plastic.woitem.woID " +
                                            "LEFT JOIN (SELECT * FROM plastic.woplan WHERE woitemid IN (SELECT MAX(woitemid) FROM plastic.woplan GROUP BY woitemid) ) b ON plastic.wo.ID = b.woitemid " + 
-                                           "WHERE plastic.wo.ID = '" + pono + "' AND NOT b.machineid = '0' " +
+                                           "WHERE plastic.wo.ID = '" + pono + "' " +
                                            "ORDER BY plastic.masterc_record.id DESC";
 
                         getWOData(woallsql2);
