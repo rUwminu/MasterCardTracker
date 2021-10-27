@@ -35,20 +35,10 @@ namespace MasterCardTracker
         public Form1()
         {
             InitializeComponent();
-
             
             conn = new MySqlConnection();
             conn.ConnectionString = "server=localhost;uid=root; pwd=CBS12345678.; database=plastic; Convert Zero Datetime=True; Allow Zero Datetime=True; default command timeout=300; ";
         }
-
-        //public async void stepSaving(string MSid, string WOid, string lastlocation, string initialstate)
-        //{
-        //    await Task.Run(() =>
-        //    {
-        //        saveHistory(MSid, WOid, lastlocation, "OUT");           
-        //    });
-        //    saveHistory(MSid, WOid, initialstate, "IN");
-        //}
 
         private async void saveHistory(string MSid, string WOid, string location, string status, int delay)
         {
@@ -194,7 +184,7 @@ namespace MasterCardTracker
                         }
                     } else
                     {
-                        label3.Text = "No Workorder with this no in process or incorrect workorder no";
+                        label3.Text = "This Workorder is not in process or incorrect workorder no";
                     }
                     reader.Close();
                 }
@@ -276,49 +266,16 @@ namespace MasterCardTracker
                         string pono = splitted[0];
                         string item = splitted[1];
 
-                        timer.Dispose();
-
-                        // Window prompt on each workorder scan
-                        //if(initialstate != "Extrusion")
-                        //{
-                        //    DialogResult dialogResult = MessageBox.Show("Is the MasterCard with the Workorder?", "Comfirmation", MessageBoxButtons.YesNo);
-                        //    if (dialogResult == DialogResult.Yes)
-                        //    {
-                        //        string woallsql2 = "SELECT plastic.masterc_record.mcr_no, plastic.masterc_record.mcr_location, plastic.wo.ID, plastic.woitem.mascId, plastic.masterc_record.mcr_status " +
-                        //                          "FROM plastic.wo " +
-                        //                          "LEFT JOIN plastic.masterc_record ON plastic.wo.MASCID = plastic.masterc_record.mcr_no " +
-                        //                          "LEFT JOIN plastic.woitem ON plastic.wo.ID = plastic.woitem.woID " +
-                        //                          "WHERE plastic.wo.ID = '" + pono + "' " +
-                        //                          "ORDER BY plastic.masterc_record.id DESC";
-
-                        //        getWOData(woallsql2);
-                        //        loaddata(pono);
-                        //    }
-                        //    else if (dialogResult == DialogResult.No)
-                        //    {
-                        //        loaddata(pono);
-                        //    }
-                        //} else if (initialstate == "Extrusion")
-                        //{
-                        //    string woallsql2 = "SELECT plastic.masterc_record.mcr_no, plastic.masterc_record.mcr_location, plastic.wo.ID, plastic.woitem.mascId, plastic.masterc_record.mcr_status " +
-                        //                          "FROM plastic.wo " +
-                        //                          "LEFT JOIN plastic.masterc_record ON plastic.wo.MASCID = plastic.masterc_record.mcr_no " +
-                        //                          "LEFT JOIN plastic.woitem ON plastic.wo.ID = plastic.woitem.woID " +
-                        //                          "WHERE plastic.wo.ID = '" + pono + "' " +
-                        //                          "ORDER BY plastic.masterc_record.id DESC";
-
-                        //    getWOData(woallsql2);
-                        //    loaddata(pono);
-                        //}
-                        //
+                        timer.Dispose();                        
 
                         // Workorder scan, record mastercard location.
-                        string woallsql2 = "SELECT plastic.masterc_record.mcr_no, plastic.masterc_record.mcr_location, plastic.wo.ID, plastic.woitem.mascId, plastic.masterc_record.mcr_status " +
+                        string woallsql2 = "SELECT plastic.masterc_record.mcr_no, plastic.masterc_record.mcr_location, plastic.wo.PO, plastic.masterc.mascNo, plastic.masterc_record.mcr_status " +
                                            "FROM plastic.wo " +
-                                           "LEFT JOIN plastic.masterc_record ON plastic.wo.MASCID = plastic.masterc_record.mcr_no " +
-                                           "LEFT JOIN plastic.woitem ON plastic.wo.ID = plastic.woitem.woID " +
-                                           "LEFT JOIN (SELECT * FROM plastic.woplan WHERE woitemid IN (SELECT MAX(woitemid) FROM plastic.woplan GROUP BY woitemid) ) b ON plastic.wo.ID = b.woitemid " + 
-                                           "WHERE plastic.wo.ID = '" + pono + "' " +
+                                           "LEFT JOIN plastic.masterc ON plastic.wo.MASCID = plastic.masterc.ID " +
+                                           "LEFT JOIN plastic.masterc_record ON plastic.masterc.mascNo = plastic.masterc_record.mcr_no " +
+                                           "LEFT JOIN plastic.woitem ON plastic.wo.ID = plastic.woitem.woId " +
+                                           "LEFT JOIN ( SELECT * FROM plastic.woplan ) AS b ON plastic.woitem.id = b.woitemid " + 
+                                           "WHERE plastic.wo.PO = '" + pono + "' " +
                                            "ORDER BY plastic.masterc_record.id DESC";
 
                         getWOData(woallsql2);
@@ -327,7 +284,7 @@ namespace MasterCardTracker
                     catch (Exception ex)
                     {
                         timer.Dispose();
-                        MessageBox.Show(string.Format("An error occurred {0}", ex.Message), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(string.Format("Invalid Workoreder Number"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
             }

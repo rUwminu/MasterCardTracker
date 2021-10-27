@@ -230,6 +230,7 @@ namespace MasterCardTracker
             this.label10.Size = new System.Drawing.Size(41, 13);
             this.label10.TabIndex = 14;
             this.label10.Text = "label10";
+            this.label10.Visible = false;
             // 
             // Form1
             // 
