@@ -295,10 +295,9 @@ namespace MasterCardTracker
         public void loaddata(string pono)
         {
             // TODO change db string
-            string woallsql = "SELECT plastic.masterc_record.mcr_no as msno, plastic.masterc_record.mcr_location as mslocation, plastic.wo.id as wono, plastic.wo.MASCID as womsno, plastic.masterc_record.mcr_datetime as msdate, plastic.masterc_record.mcr_status as msstatus " +
-                "FROM plastic.wo " +
-                "LEFT JOIN plastic.masterc_record ON plastic.wo.MASCID = plastic.masterc_record.mcr_no " +
-                "WHERE plastic.wo.id = '" + pono + "' " +
+            string woallsql = "SELECT plastic.masterc_record.mcr_no as msno, plastic.masterc_record.mcr_wo_no as wono, plastic.masterc_record.mcr_location as mslocation, plastic.masterc_record.mcr_datetime as msdate, plastic.masterc_record.mcr_status as msstatus " +
+                "FROM plastic.masterc_record " +
+                "WHERE plastic.masterc_record.mcr_wo_no = '" + pono + "' " +
                 "ORDER BY plastic.masterc_record.id DESC";
 
             getMSCHistory(woallsql);
@@ -330,6 +329,11 @@ namespace MasterCardTracker
             {
                 loaddata(pono);
             }
+        }
+
+        private void dgv1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
         }
     }
 }
