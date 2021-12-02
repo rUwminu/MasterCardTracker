@@ -24,9 +24,9 @@ namespace MasterCardTracker
 
         // This change according to user department, change depend on different user login
         // Example user is cutting department
-        // string initialstate = "Extrusion";
+         string initialstate = "Extrusion";
         // string initialstate = "Printing";
-         string initialstate = "Cutting";
+        // string initialstate = "Cutting";
         // string initialstate = "Final";
 
         static int VALIDATION_DELAY = 1500;

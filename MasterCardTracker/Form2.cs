@@ -162,10 +162,10 @@ namespace MasterCardTracker
             dt.Clear();
             dgv1.Refresh();
 
-            string woallsql = "SELECT plastic.masterc_record.mcr_no as msno, plastic.masterc_record.mcr_location as mslocation, plastic.masterc_record.mcr_datetime as msdate, plastic.masterc_record.mcr_wo_no as wono, plastic.masterc_record.mcr_status as msstatus " +
-                              "FROM plastic.masterc_record " +
-                              "WHERE plastic.masterc_record.mcr_no = '" + label3.Text + "' AND DATE(plastic.masterc_record.mcr_datetime) = '" + dateTimePicker1.Text + "' " +
-                              "ORDER BY plastic.masterc_record.id DESC";
+            string woallsql = "SELECT plastic.masterc_record.mcr_no as msno, plastic.masterc_record.mcr_wo_no as wono, plastic.masterc_record.mcr_location as mslocation, plastic.masterc_record.mcr_datetime as msdate, plastic.masterc_record.mcr_status as msstatus " +
+                                "FROM plastic.masterc_record " +
+                                "WHERE plastic.masterc_record.mcr_wo_no = '" + label3.Text + "' " +
+                                "ORDER BY plastic.masterc_record.id DESC";
 
 
             cmd = new MySqlCommand(woallsql, conn);
@@ -217,9 +217,10 @@ namespace MasterCardTracker
                     var splitted = textBox1.Text.Split('-');
                     string pono = splitted[0];
 
-                    string woallsql2 = "SELECT plastic.wo.MASCID " +
-                                      "FROM plastic.wo " +
-                                      "WHERE plastic.wo.ID = '" + pono + "' ";
+                    string woallsql2 = "SELECT plastic.masterc.mascNo " +
+                                       "FROM plastic.wo " +
+                                       "LEFT JOIN plastic.masterc ON plastic.wo.MASCID = plastic.masterc.ID " + 
+                                       "WHERE plastic.wo.PO = '" + pono + "' ";
 
                     getWoMasc(woallsql2);
                 }
