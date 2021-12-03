@@ -24,13 +24,18 @@ namespace MasterCardTracker
 
         // This change according to user department, change depend on different user login
         // Example user is cutting department
-         string initialstate = "Extrusion";
+        string initialstate = "Extrusion";
         // string initialstate = "Printing";
         // string initialstate = "Cutting";
         // string initialstate = "Final";
 
         static int VALIDATION_DELAY = 1500;
         System.Threading.Timer timer = null;
+
+        string msid;
+        string woid;
+        string lastlocation;
+        string proccessStep;
 
         public Form1()
         {
@@ -40,7 +45,7 @@ namespace MasterCardTracker
             conn.ConnectionString = "server=localhost;uid=root; pwd=CBS12345678.; database=plastic; Convert Zero Datetime=True; Allow Zero Datetime=True; default command timeout=300; ";
         }
 
-        private async void saveHistory(string MSid, string WOid, string location, string status, int delay)
+        public async void saveHistory(string MSid, string WOid, string location, string status, bool valid, int delay)
         {
             // Delay This task for last task to complete sql read and connection to close *Testing Beta
             await Task.Delay(delay);
@@ -61,15 +66,36 @@ namespace MasterCardTracker
 
             conn.Close();
 
-            label3.Text = "Done Checkin. MasterCard Update to this deparment.";
-            label3.ForeColor = System.Drawing.Color.Green;
+            if(valid)
+            {
+                label3.Text = "Done Checkin. MasterCard Update to this deparment.";
+                label3.ForeColor = System.Drawing.Color.Green;
+            }
+            else
+            {
+                label3.Text = "Workorder Don't have this process";
+                label3.ForeColor = System.Drawing.Color.Red;
+            }
 
             return;
         }
-        private async void getWOData (string query)
+
+        private async void getWOData ()
         {
+            Console.WriteLine("Running Checking");
+
+            bool isCheck = false;
             var splitted = textBox1.Text.Split('-');
             string pono = splitted[0];
+
+            string query = "SELECT plastic.masterc_record.mcr_no, plastic.masterc_record.mcr_location, plastic.wo.PO, plastic.masterc.mascNo, plastic.masterc_record.mcr_status " +
+                            "FROM plastic.wo " +
+                            "LEFT JOIN plastic.masterc ON plastic.wo.MASCID = plastic.masterc.ID " +
+                            "LEFT JOIN plastic.masterc_record ON plastic.masterc.mascNo = plastic.masterc_record.mcr_no " +
+                            "LEFT JOIN plastic.woitem ON plastic.wo.ID = plastic.woitem.woId " +
+                            "LEFT JOIN ( SELECT * FROM plastic.woplan ) AS b ON plastic.woitem.id = b.woitemid " +
+                            "WHERE plastic.wo.PO = '" + pono + "' AND NOT plastic.masterc_record.mcr_status = 'Invalid' " +
+                            "ORDER BY plastic.masterc_record.id DESC LIMIT 1";
 
             try
             {
@@ -79,13 +105,16 @@ namespace MasterCardTracker
 
                 using (MySqlDataReader reader = cmd.ExecuteReader())
                 {
+                    // Always reset the value to false
+                    isCheck = false;
+
                     if (reader.HasRows){
                         while (reader.Read())
                         {
-                            string msid = reader[3].ToString();
-                            string woid = reader[2].ToString();
-                            string lastlocation = reader[1].ToString();
-                            string proccessStep = reader[4].ToString();
+                            msid = reader[3].ToString();
+                            woid = reader[2].ToString();
+                            lastlocation = reader[1].ToString();
+                            proccessStep = reader[4].ToString();
                             //string msStatus = reader[5].ToString(); // **Not in use yet**
                             label4.Text = msid;
                             label6.Text = lastlocation;
@@ -103,15 +132,10 @@ namespace MasterCardTracker
                                 }
                                 else if (lastlocation != initialstate)
                                 {
+                                    isCheck = true;
                                     label3.Text = "New MasterCard Come In, Doing Check-In...";
                                     label3.ForeColor = System.Drawing.Color.Red;
-                                    label4.Text = msid;
-
-                                    //stepSaving(msid, woid, lastlocation, initialstate);
-                                    saveHistory(msid, woid, lastlocation, "OUT", 3000);                                   
-                                    saveHistory(msid, woid, initialstate, "IN", 5000);
-
-                                    return;
+                                    label4.Text = msid; 
                                 }
                             } 
                             else if (initialstate == "Extrusion")
@@ -126,14 +150,10 @@ namespace MasterCardTracker
                                 }
                                 else if (lastlocation != initialstate)
                                 {
+                                    isCheck = true;
                                     label3.Text = "New MasterCard Come In, Doing Check-In...";
                                     label3.ForeColor = System.Drawing.Color.Red;
                                     label4.Text = msid;
-
-                                    saveHistory(msid, woid, lastlocation, "OUT", 2000);
-                                    saveHistory(msid, woid, initialstate, "IN", 4000);
-
-                                    return;
                                 }
                             }
                             else if (initialstate == "Printing")
@@ -147,12 +167,10 @@ namespace MasterCardTracker
                                 }
                                 else if (lastlocation != initialstate)
                                 {
+                                    isCheck = true;
                                     label3.Text = "New MasterCard Come In, Doing Check-In...";
                                     label3.ForeColor = System.Drawing.Color.Red;
                                     label4.Text = msid;
-
-                                    saveHistory(msid, woid, lastlocation, "OUT", 3000);
-                                    saveHistory(msid, woid, initialstate, "IN", 5000);
                                 }
                             }
                             else if (initialstate == "Cutting")
@@ -166,14 +184,10 @@ namespace MasterCardTracker
                                 }
                                 else if (lastlocation != initialstate)
                                 {
+                                    isCheck = true;
                                     label3.Text = "New MasterCard Come In, Doing Check-In...";
                                     label3.ForeColor = System.Drawing.Color.Red;
                                     label4.Text = msid;
-
-                                    saveHistory(msid, woid, lastlocation, "OUT", 3000);
-                                    saveHistory(msid, woid, initialstate, "IN", 5000);
-
-                                    return;
                                 }
                             }
                             else
@@ -182,12 +196,21 @@ namespace MasterCardTracker
                                 label3.ForeColor = System.Drawing.Color.Red;
                             }
                         }
+
+                        reader.Close();
+                        conn.Close();
                     } else
                     {
-                        label3.Text = "This Workorder is not in process or incorrect workorder no";
-                    }
-                    reader.Close();
+                        // Record new Workorder comming in
+                        getNewWoDataAndSave();
+                    }                  
                 }
+
+                if(isCheck == true)
+                {
+                    saveHistory(msid, woid, initialstate, "IN", true, 500);
+                    saveHistory(msid, woid, lastlocation, "OUT", true, 300);                                     
+                }   
             }
             catch (Exception ex)
             {
@@ -196,6 +219,55 @@ namespace MasterCardTracker
             finally
             {
                 conn.Close();
+            }
+
+            
+        }
+
+        private async void getNewWoDataAndSave()
+        {
+            await Task.Delay(500);
+
+            var splitted = textBox1.Text.Split('-');
+            string pono = splitted[0];
+            string item = splitted[1];
+
+            // Workorder scan, record mastercard location.
+            string query = "SELECT plastic.wo.PO, plastic.masterc.mascNo " +
+                           "FROM plastic.wo " +
+                           "LEFT JOIN plastic.masterc ON plastic.wo.MASCID = plastic.masterc.ID " +
+                           "LEFT JOIN plastic.woitem ON plastic.wo.ID = plastic.woitem.woId " +
+                           "LEFT JOIN ( SELECT * FROM plastic.woplan ) AS b ON plastic.woitem.id = b.woitemid " +
+                           "WHERE plastic.wo.PO = '" + pono + "' ";
+
+            try
+            {
+                cmd = new MySqlCommand(query, conn);
+
+                conn.Open();
+
+                using (MySqlDataReader reader = cmd.ExecuteReader())
+                {
+                    if (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            string msid = reader[1].ToString();
+                            string woid = reader[0].ToString();
+
+                            Console.WriteLine("New Comer saving...");
+                            saveHistory(msid, woid, initialstate, "IN", true, 500);
+                        }
+                    }
+
+                    reader.Close();
+                }
+
+                conn.Close();
+            }
+            catch (Exception ex)
+            {
+
             }
         }
 
@@ -267,19 +339,18 @@ namespace MasterCardTracker
                         string item = splitted[1];
 
                         timer.Dispose();                        
+                        //loaddata(pono);
 
-                        // Workorder scan, record mastercard location.
-                        string woallsql2 = "SELECT plastic.masterc_record.mcr_no, plastic.masterc_record.mcr_location, plastic.wo.PO, plastic.masterc.mascNo, plastic.masterc_record.mcr_status " +
-                                           "FROM plastic.wo " +
-                                           "LEFT JOIN plastic.masterc ON plastic.wo.MASCID = plastic.masterc.ID " +
-                                           "LEFT JOIN plastic.masterc_record ON plastic.masterc.mascNo = plastic.masterc_record.mcr_no " +
-                                           "LEFT JOIN plastic.woitem ON plastic.wo.ID = plastic.woitem.woId " +
-                                           "LEFT JOIN ( SELECT * FROM plastic.woplan ) AS b ON plastic.woitem.id = b.woitemid " + 
-                                           "WHERE plastic.wo.PO = '" + pono + "' " +
-                                           "ORDER BY plastic.masterc_record.id DESC";
+                        // Query to check is the wo/master card have this process
+                        string woprocesssql = "SELECT plastic.wo.PO, plastic.parat.code, plastic.masterc.mascNo " +
+                                              "FROM plastic.wo " +
+                                              "LEFT JOIN plastic.masterc ON plastic.wo.MASCID = plastic.masterc.ID " +
+                                              "LEFT JOIN plastic.planwoprocess ON plastic.wo.MASCID = plastic.planwoprocess.mascid " +
+                                              "LEFT JOIN plastic.parat ON plastic.planwoprocess.paratId = plastic.parat.id " +
+                                              "WHERE plastic.wo.PO = '" + pono + "' ";
 
-                        getWOData(woallsql2);
-                        loaddata(pono);
+
+                        getAllWoProcess(woprocesssql);
                     }
                     catch (Exception ex)
                     {
@@ -289,7 +360,151 @@ namespace MasterCardTracker
                 }
             }
             ));
+        }
 
+        public class WoProcess
+        {
+            public string wopo;
+            public string process;
+            public string masterc;
+
+            public WoProcess(string wopo, string process, string masterc)
+            {
+                this.wopo = wopo;
+                this.process = process;
+                this.masterc = masterc;
+            }
+
+            public string Wopo
+            {
+                get { return wopo; }
+                set { wopo = value; }
+            }
+
+            public string Process
+            {
+                get { return process; }
+                set { process = value; }
+            }
+
+            public string Masterc
+            {
+                get { return masterc; }
+                set { masterc = value; }
+            }
+        }
+
+
+        public void getAllWoProcess(string query)
+        {
+            List<string> proccessStep = new List<string>();
+            List<WoProcess> all = new List<WoProcess>();
+
+            try
+            {
+                cmd = new MySqlCommand(query, conn);
+
+                conn.Open();
+
+                using (MySqlDataReader reader = cmd.ExecuteReader())
+                {
+                    if(reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            Object[] values = new Object[reader.FieldCount];
+
+                            // Get the Row with all its column values..
+                            reader.GetValues(values);
+
+                            // Check is there process for wo, if yes push all the possible process to one array of object
+                            if(values[1].ToString() != null || values[1].ToString() != "")
+                            {
+                                all.Add(new WoProcess(values[0].ToString(), values[1].ToString(), values[2].ToString()));
+                            }
+                        }
+                    }
+                    reader.Close();
+                }
+                conn.Close();
+
+                // Filter / Reduce the duplicate process of WO, left only one of each process
+                // Exp: WO process: EXCU -> PRINT -> PRINT-> CUT-> CUT
+                // Filter Result: EXCU, PRINT, CUT
+                var tempArr = all.GroupBy(x => x.process).Select(grp => grp.First()).ToArray();
+
+                foreach (var wolist in tempArr)
+                {
+                    //Put all process to one array
+                    proccessStep.Add(wolist.process);
+                }
+
+                // Run function to check the wo process step have process with current department
+                checkProcessStepHaveStepInDepartment(tempArr[0].wopo.ToString(), tempArr[0].masterc.ToString(), proccessStep.ToArray());
+            } 
+            catch (Exception ex)
+            {
+                timer.Dispose();
+                // MessageBox.Show(string.Format("Invalid Workoreder Number"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            } finally
+            {
+                conn.Close();
+            }
+        }
+
+        public void checkProcessStepHaveStepInDepartment (string wopo, string masc, string[] arr)
+        {
+            int i, j;
+            string[] stepInDepart;
+            List<string> termsList = new List<string>();
+
+            //foreach (var item in arr)
+            //{
+            //    Console.WriteLine(item);
+            //}
+
+            if (initialstate == "Extrusion")
+            {
+                termsList.Clear();
+                termsList.Add("EXTR");
+            }
+
+            if (initialstate == "Printing")
+            {
+                termsList.Clear();
+                termsList.Add("PRINT");
+            }
+
+            if (initialstate == "Cutting")
+            {
+                termsList.Clear();
+                termsList.Add("CUT");
+                termsList.Add("SLIT");
+            }
+
+            stepInDepart = termsList.ToArray();
+
+            for (i = 0; i < arr.Length; i++)
+            {
+                for(j = 0; j < stepInDepart.Length; j++)
+                {
+                    if(arr[i].ToString() == stepInDepart[j].ToString())
+                    {
+                        // if match any step in department array, perform checking
+                        getWOData();
+                        return;
+                    } 
+                    else
+                    {
+                        continue;
+                    }
+                }
+            }
+
+            // IF no match step in department array, prompt alert and save the scan location for record
+            saveHistory(masc, wopo, initialstate, "Invalid", false, 500);
+            MessageBox.Show(string.Format("This WO don't have this process"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return; 
         }
 
         public void loaddata(string pono)
