@@ -29,6 +29,7 @@ namespace MasterCardTracker
         /// </summary>
         private void InitializeComponent()
         {
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             this.dateTimePicker1 = new System.Windows.Forms.DateTimePicker();
             this.dgv1 = new System.Windows.Forms.DataGridView();
             this.mastercard_no = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -41,6 +42,7 @@ namespace MasterCardTracker
             this.label1 = new System.Windows.Forms.Label();
             this.button1 = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dgv1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -62,11 +64,19 @@ namespace MasterCardTracker
             this.ms_location,
             this.his_datetime,
             this.status});
-            this.dgv1.Location = new System.Drawing.Point(12, 102);
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.25F);
+            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dgv1.DefaultCellStyle = dataGridViewCellStyle1;
+            this.dgv1.Location = new System.Drawing.Point(12, 147);
             this.dgv1.Name = "dgv1";
-            this.dgv1.Size = new System.Drawing.Size(695, 382);
+            this.dgv1.Size = new System.Drawing.Size(695, 337);
             this.dgv1.TabIndex = 8;
-            this.dgv1.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv1_CellContentClick);
+            this.dgv1.CellFormatting += dgv1_CellFormatting;
             // 
             // mastercard_no
             // 
@@ -151,17 +161,29 @@ namespace MasterCardTracker
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(501, 86);
+            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label3.Location = new System.Drawing.Point(9, 113);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(35, 13);
+            this.label3.Size = new System.Drawing.Size(52, 18);
             this.label3.TabIndex = 13;
             this.label3.Text = "label3";
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label4.Location = new System.Drawing.Point(8, 89);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(136, 24);
+            this.label4.TabIndex = 14;
+            this.label4.Text = "MasterCard No";
             // 
             // Form2
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(717, 496);
+            this.Controls.Add(this.label4);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.label1);
@@ -192,5 +214,6 @@ namespace MasterCardTracker
         private System.Windows.Forms.DataGridViewTextBoxColumn ms_location;
         private System.Windows.Forms.DataGridViewTextBoxColumn his_datetime;
         private System.Windows.Forms.DataGridViewTextBoxColumn status;
+        private System.Windows.Forms.Label label4;
     }
 }

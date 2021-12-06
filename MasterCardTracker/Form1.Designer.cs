@@ -125,7 +125,7 @@ namespace MasterCardTracker
             this.dgv1.Name = "dgv1";
             this.dgv1.Size = new System.Drawing.Size(665, 249);
             this.dgv1.TabIndex = 13;
-            this.dgv1.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv1_CellContentClick);
+            this.dgv1.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dgv1_CellFormatting_1);
             // 
             // mastercard
             // 
@@ -188,9 +188,9 @@ namespace MasterCardTracker
             this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label7.Location = new System.Drawing.Point(217, 86);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(116, 24);
+            this.label7.Size = new System.Drawing.Size(91, 24);
             this.label7.TabIndex = 9;
-            this.label7.Text = "Last Process";
+            this.label7.Text = "Last Scan";
             // 
             // label8
             // 
@@ -198,9 +198,9 @@ namespace MasterCardTracker
             this.label8.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label8.Location = new System.Drawing.Point(12, 86);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(121, 24);
+            this.label8.Size = new System.Drawing.Size(60, 24);
             this.label8.TabIndex = 10;
-            this.label8.Text = "Process Step";
+            this.label8.Text = "Status";
             // 
             // label9
             // 
@@ -208,9 +208,9 @@ namespace MasterCardTracker
             this.label9.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label9.Location = new System.Drawing.Point(13, 110);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(89, 16);
+            this.label9.Size = new System.Drawing.Size(45, 16);
             this.label9.TabIndex = 11;
-            this.label9.Text = "Process Step";
+            this.label9.Text = "Status";
             // 
             // button1
             // 

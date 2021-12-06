@@ -24,8 +24,8 @@ namespace MasterCardTracker
 
         // This change according to user department, change depend on different user login
         // Example user is cutting department
-        string initialstate = "Extrusion";
-        // string initialstate = "Printing";
+        // string initialstate = "Extrusion";
+         string initialstate = "Printing";
         // string initialstate = "Cutting";
         // string initialstate = "Final";
 
@@ -108,6 +108,7 @@ namespace MasterCardTracker
                     // Always reset the value to false
                     isCheck = false;
 
+                    // Check record is the workorder have any pass record
                     if (reader.HasRows){
                         while (reader.Read())
                         {
@@ -201,7 +202,7 @@ namespace MasterCardTracker
                         conn.Close();
                     } else
                     {
-                        // Record new Workorder comming in
+                        // If is new workorder pass down to production, this function run and record
                         getNewWoDataAndSave();
                     }                  
                 }
@@ -330,6 +331,9 @@ namespace MasterCardTracker
         {
             this.Invoke(new Action(() =>
             {
+                label4.Text = "";
+                label9.Text = "";
+
                 if (textBox1.Text != "" )
                 {
                     try
@@ -412,6 +416,9 @@ namespace MasterCardTracker
                     {
                         while (reader.Read())
                         {
+                            label4.Text = reader[2].ToString();
+                            label9.Text = "Invalid";
+
                             Object[] values = new Object[reader.FieldCount];
 
                             // Get the Row with all its column values..
@@ -546,9 +553,41 @@ namespace MasterCardTracker
             }
         }
 
-        private void dgv1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        // Dynamic Data Grid View Status Column Color differential
+        private void dgv1_CellFormatting_1(object sender, DataGridViewCellFormattingEventArgs e)
         {
+            try
+            {
+                foreach (DataGridViewRow myRow in dgv1.Rows)
+                {
+                    if (Convert.ToString(myRow.Cells[4].Value) != null)
+                    {
+                        if (Convert.ToString(myRow.Cells[4].Value) == "IN")
+                        {
+                            // HightLight row with background color
+                            //myRow.DefaultCellStyle.BackColor = Color.ForestGreen;
 
+                            // HightLight selected cell in row with background color
+                            myRow.Cells["Status"].Style.BackColor = Color.ForestGreen;
+                        }
+                        else if (Convert.ToString(myRow.Cells[4].Value) == "OUT")
+                        {
+                            //myRow.DefaultCellStyle.BackColor = Color.RoyalBlue;
+                            myRow.Cells["Status"].Style.BackColor = Color.RoyalBlue;
+
+                        }
+                        else if (Convert.ToString(myRow.Cells[4].Value) == "Invalid")
+                        {
+                            //myRow.DefaultCellStyle.BackColor = Color.Crimson;
+                            myRow.Cells["Status"].Style.BackColor = Color.Crimson;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
         }
     }
 }

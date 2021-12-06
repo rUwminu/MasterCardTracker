@@ -58,12 +58,14 @@ namespace MasterCardTracker
                         while (reader.Read())
                         {
                             label3.Text = reader[0].ToString();
+                            label3.ForeColor = System.Drawing.Color.Green;
                             GetByWOHistory(reader[0].ToString());
                         }
 
                     } else
                     {
-                        label3.Text = "No Workorder with this id!";
+                        label3.Text = "No Workorder with this No!";
+                        label3.ForeColor = System.Drawing.Color.Red;
                     }
                     reader.Close();
                 }
@@ -105,7 +107,7 @@ namespace MasterCardTracker
 
         public async void GetByWOHistory(string masterNo)
         {
-            await Task.Delay(3000);
+            await Task.Delay(1000);
 
             dt.Clear();
             dgv1.Refresh();
@@ -164,7 +166,7 @@ namespace MasterCardTracker
 
             string woallsql = "SELECT plastic.masterc_record.mcr_no as msno, plastic.masterc_record.mcr_wo_no as wono, plastic.masterc_record.mcr_location as mslocation, plastic.masterc_record.mcr_datetime as msdate, plastic.masterc_record.mcr_status as msstatus " +
                                 "FROM plastic.masterc_record " +
-                                "WHERE plastic.masterc_record.mcr_wo_no = '" + label3.Text + "' " +
+                                "WHERE plastic.masterc_record.mcr_no = '" + label3.Text + "' AND DATE(plastic.masterc_record.mcr_datetime) = '" + dateTimePicker1.Text + "' " +
                                 "ORDER BY plastic.masterc_record.id DESC";
 
 
@@ -228,11 +230,6 @@ namespace MasterCardTracker
             ));
         }
 
-        private void dgv1_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-
-        }
-
         private void dateTimePicker1_ValueChanged(object sender, EventArgs e)
         {
             GetByDateHistory();
@@ -242,5 +239,43 @@ namespace MasterCardTracker
         {
             GetByWOnDateHistory();
         }
+
+        // Dynamic Data Grid View Status Column Color differential
+        public void dgv1_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+        {
+            try
+            {
+                foreach (DataGridViewRow myRow in dgv1.Rows)
+                {
+                    if (Convert.ToString(myRow.Cells[4].Value) != null)
+                    {
+                        if (Convert.ToString(myRow.Cells[4].Value) == "IN")
+                        {
+                            // HightLight row with background color
+                            //myRow.DefaultCellStyle.BackColor = Color.ForestGreen;
+
+                            // HightLight selected cell in row with background color
+                            myRow.Cells["Status"].Style.BackColor = Color.ForestGreen;
+                        }
+                        else if (Convert.ToString(myRow.Cells[4].Value) == "OUT")
+                        {
+                            //myRow.DefaultCellStyle.BackColor = Color.RoyalBlue;
+                            myRow.Cells["Status"].Style.BackColor = Color.RoyalBlue;
+
+                        }
+                        else if (Convert.ToString(myRow.Cells[4].Value) == "Invalid")
+                        {
+                            //myRow.DefaultCellStyle.BackColor = Color.Crimson;
+                            myRow.Cells["Status"].Style.BackColor = Color.Crimson;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+        }
+
     }
 }
