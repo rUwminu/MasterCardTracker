@@ -525,16 +525,6 @@ namespace MasterCardTracker
             getMSCHistory(woallsql);
         }
 
-        private void label4_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label2_Click(object sender, EventArgs e)
-        {
-
-        }
-
         private void button1_Click(object sender, EventArgs e)
         {
             Form2 frm = new Form2(this);

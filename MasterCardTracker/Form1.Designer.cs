@@ -90,7 +90,6 @@ namespace MasterCardTracker
             this.label4.Size = new System.Drawing.Size(99, 16);
             this.label4.TabIndex = 4;
             this.label4.Text = "MasterCard No";
-            this.label4.Click += new System.EventHandler(this.label4_Click);
             // 
             // label2
             // 
@@ -101,7 +100,6 @@ namespace MasterCardTracker
             this.label2.Size = new System.Drawing.Size(136, 24);
             this.label2.TabIndex = 5;
             this.label2.Text = "MasterCard No";
-            this.label2.Click += new System.EventHandler(this.label2_Click);
             // 
             // label5
             // 
