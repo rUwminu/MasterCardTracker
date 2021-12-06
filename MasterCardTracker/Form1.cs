@@ -200,10 +200,13 @@ namespace MasterCardTracker
 
                         reader.Close();
                         conn.Close();
-                    } else
+                    } 
+
+                    if (!reader.HasRows)
                     {
                         // If is new workorder pass down to production, this function run and record
                         getNewWoDataAndSave();
+                        return;
                     }                  
                 }
 
@@ -225,9 +228,9 @@ namespace MasterCardTracker
             
         }
 
-        private async void getNewWoDataAndSave()
+        public async void getNewWoDataAndSave()
         {
-            await Task.Delay(500);
+            await Task.Delay(300);
 
             var splitted = textBox1.Text.Split('-');
             string pono = splitted[0];
@@ -253,22 +256,26 @@ namespace MasterCardTracker
                     {
                         while (reader.Read())
                         {
-                            string msid = reader[1].ToString();
-                            string woid = reader[0].ToString();
-
-                            Console.WriteLine("New Comer saving...");
-                            saveHistory(msid, woid, initialstate, "IN", true, 500);
+                            msid = reader[1].ToString();
+                            woid = reader[0].ToString();
                         }
                     }
 
                     reader.Close();
                 }
-
                 conn.Close();
+
+                saveHistory(msid, woid, initialstate, "IN", true, 500);
+
+                return;
             }
             catch (Exception ex)
             {
-
+                MessageBox.Show(string.Format("An error occurred {0}", ex.Message), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                conn.Close();
             }
         }
 
@@ -464,11 +471,6 @@ namespace MasterCardTracker
             int i, j;
             string[] stepInDepart;
             List<string> termsList = new List<string>();
-
-            //foreach (var item in arr)
-            //{
-            //    Console.WriteLine(item);
-            //}
 
             if (initialstate == "Extrusion")
             {
