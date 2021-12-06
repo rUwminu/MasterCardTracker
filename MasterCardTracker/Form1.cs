@@ -27,7 +27,7 @@ namespace MasterCardTracker
         // string initialstate = "Extrusion";
          string initialstate = "Printing";
         // string initialstate = "Cutting";
-        // string initialstate = "Final";
+        // string initialstate = "Planning";
 
         static int VALIDATION_DELAY = 1500;
         System.Threading.Timer timer = null;
@@ -489,7 +489,20 @@ namespace MasterCardTracker
                 termsList.Add("SLIT");
             }
 
+            // Last or Return Mastercard to Admin/Planner/CS, just record the info.
+            if (initialstate == "Planning")
+            {
+                saveHistory(masc, wopo, initialstate, "IN", true, 300);
+                return;
+            }
+
             stepInDepart = termsList.ToArray();
+
+            // Console writeline possible process step
+            foreach(var item in arr)
+            {
+                Console.WriteLine(item);
+            }
 
             for (i = 0; i < arr.Length; i++)
             {
@@ -509,8 +522,8 @@ namespace MasterCardTracker
             }
 
             // IF no match step in department array, prompt alert and save the scan location for record
-            saveHistory(masc, wopo, initialstate, "Invalid", false, 500);
-            MessageBox.Show(string.Format("This WO don't have this process"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            saveHistory(masc, wopo, initialstate, "Invalid", false, 300);
+            MessageBox.Show(string.Format("This Workorder Doesn't Have This Process, Please Return The Workorder To Last Deparment!"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return; 
         }
 
