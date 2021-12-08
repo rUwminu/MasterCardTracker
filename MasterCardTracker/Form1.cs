@@ -32,6 +32,7 @@ namespace MasterCardTracker
         static int VALIDATION_DELAY = 1500;
         System.Threading.Timer timer = null;
 
+        string isComp;
         string msid;
         string woid;
         string lastlocation;
@@ -76,8 +77,6 @@ namespace MasterCardTracker
                 label3.Text = "Workorder Don't have this process";
                 label3.ForeColor = System.Drawing.Color.Red;
             }
-
-            return;
         }
 
         private async void getWOData ()
@@ -110,6 +109,7 @@ namespace MasterCardTracker
 
                     // Check record is the workorder have any pass record
                     if (reader.HasRows){
+                        //Console.WriteLine("Have Row?");
                         while (reader.Read())
                         {
                             msid = reader[3].ToString();
@@ -119,9 +119,9 @@ namespace MasterCardTracker
                             //string msStatus = reader[5].ToString(); // **Not in use yet**
                             label4.Text = msid;
                             label6.Text = lastlocation;
-                            label9.Text = proccessStep;
+                            label9.Text = proccessStep;                         
 
-                            //This if/else check user department and the posible Workorder can pass to this user deparment
+                            // This if/else check user department and the posible Workorder can pass to this user deparment
                             if (initialstate == "Final")
                             {
                                 if (msid != "" && lastlocation == initialstate && pono == woid)
@@ -197,24 +197,29 @@ namespace MasterCardTracker
                                 label3.ForeColor = System.Drawing.Color.Red;
                             }
                         }
-
-                        reader.Close();
-                        conn.Close();
                     } 
 
                     if (!reader.HasRows)
                     {
+                        //Console.WriteLine("Trigger new save?");
+                        // It check the master record for any result, new wo will not be in master record. Then trigger this
                         // If is new workorder pass down to production, this function run and record
                         getNewWoDataAndSave();
                         return;
-                    }                  
+                    }
+
+                    reader.Close();
+                    conn.Close();
                 }
 
                 if(isCheck == true)
                 {
+                    //Console.WriteLine("Trigger Save In Out");
                     saveHistory(msid, woid, initialstate, "IN", true, 500);
                     saveHistory(msid, woid, lastlocation, "OUT", true, 300);                                     
-                }   
+                }
+
+                return;
             }
             catch (Exception ex)
             {
@@ -236,7 +241,7 @@ namespace MasterCardTracker
             string pono = splitted[0];
             string item = splitted[1];
 
-            // Workorder scan, record mastercard location.
+            // Get PO and mastercard No
             string query = "SELECT plastic.wo.PO, plastic.masterc.mascNo " +
                            "FROM plastic.wo " +
                            "LEFT JOIN plastic.masterc ON plastic.wo.MASCID = plastic.masterc.ID " +
@@ -353,7 +358,7 @@ namespace MasterCardTracker
                         //loaddata(pono);
 
                         // Query to check is the wo/master card have this process
-                        string woprocesssql = "SELECT plastic.wo.PO, plastic.parat.code, plastic.masterc.mascNo " +
+                        string woprocesssql = "SELECT plastic.wo.PO, plastic.parat.code, plastic.masterc.mascNo, plastic.wo.COMP " +
                                               "FROM plastic.wo " +
                                               "LEFT JOIN plastic.masterc ON plastic.wo.MASCID = plastic.masterc.ID " +
                                               "LEFT JOIN plastic.planwoprocess ON plastic.wo.MASCID = plastic.planwoprocess.mascid " +
@@ -423,6 +428,7 @@ namespace MasterCardTracker
                     {
                         while (reader.Read())
                         {
+                            isComp = reader[3].ToString();
                             label4.Text = reader[2].ToString();
                             label9.Text = "Invalid";
 
@@ -435,7 +441,7 @@ namespace MasterCardTracker
                             if(values[1].ToString() != null || values[1].ToString() != "")
                             {
                                 all.Add(new WoProcess(values[0].ToString(), values[1].ToString(), values[2].ToString()));
-                            }
+                            } 
                         }
                     }
                     reader.Close();
@@ -453,13 +459,21 @@ namespace MasterCardTracker
                     proccessStep.Add(wolist.process);
                 }
 
-                // Run function to check the wo process step have process with current department
-                checkProcessStepHaveStepInDepartment(tempArr[0].wopo.ToString(), tempArr[0].masterc.ToString(), proccessStep.ToArray());
+                if(isComp != "1")
+                {
+                    // Run function to check the wo process step have process with current department
+                    checkProcessStepHaveStepInDepartment(tempArr[0].wopo.ToString(), tempArr[0].masterc.ToString(), proccessStep.ToArray());
+                }
+                else
+                {
+                    MessageBox.Show(string.Format("This Workorder Already Completed, Please Return To Planner!"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    saveHistory(tempArr[0].masterc.ToString(), tempArr[0].wopo.ToString(), initialstate, "Invalid", true, 500);
+                }      
             } 
             catch (Exception ex)
             {
                 timer.Dispose();
-                // MessageBox.Show(string.Format("Invalid Workoreder Number"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(string.Format("Invalid Workoreder Number"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             } finally
             {
                 conn.Close();
@@ -472,6 +486,7 @@ namespace MasterCardTracker
             string[] stepInDepart;
             List<string> termsList = new List<string>();
 
+            // Add possible process to list depend on user loging
             if (initialstate == "Extrusion")
             {
                 termsList.Clear();
@@ -506,6 +521,7 @@ namespace MasterCardTracker
                 Console.WriteLine(item);
             }
 
+            // Compare Department possible process with WO process
             for (i = 0; i < arr.Length; i++)
             {
                 for(j = 0; j < stepInDepart.Length; j++)
