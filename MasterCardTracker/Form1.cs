@@ -24,8 +24,8 @@ namespace MasterCardTracker
 
         // This change according to user department, change depend on different user login
         // Example user is cutting department
-        // string initialstate = "Extrusion";
-         string initialstate = "Printing";
+         string initialstate = "Extrusion";
+        // string initialstate = "Printing";
         // string initialstate = "Cutting";
         // string initialstate = "Planning";
 
@@ -79,7 +79,7 @@ namespace MasterCardTracker
             }
         }
 
-        private async void getWOData ()
+        private void getWOData ()
         {
             Console.WriteLine("Running Checking");
 
@@ -91,8 +91,8 @@ namespace MasterCardTracker
                             "FROM plastic.wo " +
                             "LEFT JOIN plastic.masterc ON plastic.wo.MASCID = plastic.masterc.ID " +
                             "LEFT JOIN plastic.masterc_record ON plastic.masterc.mascNo = plastic.masterc_record.mcr_no " +
-                            "LEFT JOIN plastic.woitem ON plastic.wo.ID = plastic.woitem.woId " +
-                            "LEFT JOIN ( SELECT * FROM plastic.woplan ) AS b ON plastic.woitem.id = b.woitemid " +
+                            //"LEFT JOIN plastic.woitem ON plastic.wo.ID = plastic.woitem.woId " +
+                            //"LEFT JOIN ( SELECT * FROM plastic.woplan ) AS b ON plastic.woitem.id = b.woitemid " +
                             "WHERE plastic.wo.PO = '" + pono + "' AND NOT plastic.masterc_record.mcr_status = 'Invalid' " +
                             "ORDER BY plastic.masterc_record.id DESC LIMIT 1";
 
@@ -201,10 +201,10 @@ namespace MasterCardTracker
 
                     if (!reader.HasRows)
                     {
-                        //Console.WriteLine("Trigger new save?");
+                        Console.WriteLine("Trigger new save?");
                         // It check the master record for any result, new wo will not be in master record. Then trigger this
                         // If is new workorder pass down to production, this function run and record
-                        getNewWoDataAndSave();
+                        getNewWoDataAndSave(pono);
                         return;
                     }
 
@@ -233,13 +233,11 @@ namespace MasterCardTracker
             
         }
 
-        public async void getNewWoDataAndSave()
+        public async void getNewWoDataAndSave(string pono)
         {
             await Task.Delay(300);
 
-            var splitted = textBox1.Text.Split('-');
-            string pono = splitted[0];
-            string item = splitted[1];
+            // string item = splitted[1];
 
             // Get PO and mastercard No
             string query = "SELECT plastic.wo.PO, plastic.masterc.mascNo " +
@@ -547,7 +545,6 @@ namespace MasterCardTracker
 
         public void loaddata(string pono)
         {
-            // TODO change db string
             string woallsql = "SELECT plastic.masterc_record.mcr_no as msno, plastic.masterc_record.mcr_wo_no as wono, plastic.masterc_record.mcr_location as mslocation, plastic.masterc_record.mcr_datetime as msdate, plastic.masterc_record.mcr_status as msstatus " +
                 "FROM plastic.masterc_record " +
                 "WHERE plastic.masterc_record.mcr_wo_no = '" + pono + "' " +
@@ -609,6 +606,24 @@ namespace MasterCardTracker
             {
                 Console.WriteLine(ex);
             }
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            var splitted = textBox1.Text.Split('-');
+            string pono = splitted[0];
+            //string item = splitted[1];
+
+            if (textBox1.Text != "")
+            {
+                loaddata(pono);
+            }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            Form3 frm = new Form3(this);
+            frm.Show();
         }
     }
 }
