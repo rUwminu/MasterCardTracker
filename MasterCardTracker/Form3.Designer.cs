@@ -35,7 +35,8 @@ namespace MasterCardTracker
             this.textBox2 = new System.Windows.Forms.TextBox();
             this.dgv1 = new System.Windows.Forms.DataGridView();
             this.wopo = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.wocomp = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.item = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.completed = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.womasc = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.woplan = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dgv1)).BeginInit();
@@ -83,7 +84,8 @@ namespace MasterCardTracker
             this.dgv1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgv1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.wopo,
-            this.wocomp,
+            this.item,
+            this.completed,
             this.womasc,
             this.woplan});
             this.dgv1.Cursor = System.Windows.Forms.Cursors.Default;
@@ -100,12 +102,19 @@ namespace MasterCardTracker
             this.wopo.Name = "wopo";
             this.wopo.ReadOnly = true;
             // 
-            // wocomp
+            // item
             // 
-            this.wocomp.DataPropertyName = "wocomp";
-            this.wocomp.HeaderText = "Completed";
-            this.wocomp.Name = "wocomp";
-            this.wocomp.ReadOnly = true;
+            this.item.DataPropertyName = "wopoitem";
+            this.item.HeaderText = "Item";
+            this.item.Name = "item";
+            this.item.ReadOnly = true;
+            // 
+            // completed
+            // 
+            this.completed.DataPropertyName = "wocomp";
+            this.completed.HeaderText = "Completed";
+            this.completed.Name = "completed";
+            this.completed.ReadOnly = true;
             // 
             // womasc
             // 
@@ -148,7 +157,8 @@ namespace MasterCardTracker
         private System.Windows.Forms.TextBox textBox2;
         private System.Windows.Forms.DataGridView dgv1;
         private System.Windows.Forms.DataGridViewTextBoxColumn wopo;
-        private System.Windows.Forms.DataGridViewTextBoxColumn wocomp;
+        private System.Windows.Forms.DataGridViewTextBoxColumn item;
+        private System.Windows.Forms.DataGridViewTextBoxColumn completed;
         private System.Windows.Forms.DataGridViewTextBoxColumn womasc;
         private System.Windows.Forms.DataGridViewTextBoxColumn woplan;
     }

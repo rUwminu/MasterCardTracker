@@ -56,7 +56,7 @@ namespace MasterCardTracker
                         {
                             textBox2.Text = reader[0].ToString();
                             textBox2.ForeColor = System.Drawing.Color.Green;
-                            //GetByWOHistory(reader[0].ToString());
+                            getWoInProcess(reader[0].ToString());
                         }
 
                     }
@@ -85,26 +85,41 @@ namespace MasterCardTracker
             dt.Clear();
             dgv1.Refresh();
 
-            string woallsql = "SELECT plastic.wo.PO as wopo, plastic.wo.COMP as wocomp, plastic.masterc.mascNo as womasc, plastic.woplan.machineid as woplan " +
-                               "FROM plastic.masterc " +
-                               "LEFT JOIN plastic.wo ON plastic.masterc.ID = plastic.wo.MASCID " +
-                               "LEFT JOIN plastic.woplan ON plastic.wo.ID = plastic.woplan.woitemid " +
+            try
+            {
+                string woallsql = "SELECT plastic.wo.PO as wopo, plastic.wo.COMP as wocomp, plastic.masterc.mascNo as womasc, plastic.woplan.machineid as woplan " +
+                               "FROM plastic.woplan " +
+                               "LEFT JOIN plastic.wo ON plastic.woplan.woitemid = plastic.wo.ID " +
+                               "LEFT JOIN plastic.masterc ON plastic.woplan.mascid = plastic.masterc.ID " +
                                "WHERE plastic.masterc.mascNo = '" + masc + "' " +
                                "ORDER BY plastic.woplan.id DESC LIMIT 10 ";
 
-            cmd = new MySqlCommand(woallsql, conn);
+                string woallsql2 = "SELECT plastic.wo.PO as wopo, plastic.woitem.item as wopoitem, plastic.wo.COMP as wocomp, plastic.masterc.mascNo as womasc, plastic.woplan.machineid as woplan " +
+                               "FROM plastic.wo " +
+                               "LEFT JOIN plastic.woitem ON plastic.wo.ID = plastic.woitem.woId " +
+                               "LEFT JOIN plastic.woplan ON plastic.woitem.id = plastic.woplan.woitemid " +
+                               "LEFT JOIN plastic.masterc ON plastic.wo.MASCID = plastic.masterc.ID " +
+                               "WHERE plastic.masterc.mascNo = '" + masc + "' " +
+                               "ORDER BY plastic.wo.ID DESC LIMIT 10 ";
 
-            conn.Open();
+                cmd = new MySqlCommand(woallsql2, conn);
 
-            using (MySqlDataAdapter da = new MySqlDataAdapter(cmd))
+                conn.Open();
+
+                using (MySqlDataAdapter da = new MySqlDataAdapter(cmd))
+                {
+                    Console.WriteLine("Is this running?");
+                    da.Fill(dt);
+                }
+
+                dgv1.DataSource = dt;
+                dgv1.DataMember = dt.TableName;
+
+                conn.Close();
+            } catch( Exception ex)
             {
-                da.Fill(dt);
+                MessageBox.Show(string.Format("An error occurred {0}", ex.Message), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-
-            dgv1.DataSource = dt;
-            dgv1.DataMember = dt.TableName;
-
-            conn.Close();
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
@@ -158,20 +173,20 @@ namespace MasterCardTracker
             {
                 foreach (DataGridViewRow myRow in dgv1.Rows)
                 {
-                    if (Convert.ToString(myRow.Cells[1].Value) != null)
+                    if (Convert.ToString(myRow.Cells[2].Value) != null)
                     {
-                        if (Convert.ToInt32(myRow.Cells[1].Value) > 0)
+                        if (Convert.ToInt32(myRow.Cells[2].Value) > 0)
                         {
                             // HightLight row with background color
                             //myRow.DefaultCellStyle.BackColor = Color.ForestGreen;
 
                             // HightLight selected cell in row with background color
-                            myRow.Cells["Completed"].Style.BackColor = Color.ForestGreen;
+                            myRow.Cells[2].Style.BackColor = Color.ForestGreen;
                         }
-                        else if (Convert.ToInt32(myRow.Cells[1].Value) < 0)
+                        else if (Convert.ToInt32(myRow.Cells[2].Value) <= 0)
                         {
                             //myRow.DefaultCellStyle.BackColor = Color.RoyalBlue;
-                            myRow.Cells["Completed"].Style.BackColor = Color.Crimson;
+                            myRow.Cells[2].Style.BackColor = Color.Crimson;
 
                         }
                     }

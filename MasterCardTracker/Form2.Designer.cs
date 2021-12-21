@@ -76,6 +76,7 @@ namespace MasterCardTracker
             this.dgv1.Name = "dgv1";
             this.dgv1.Size = new System.Drawing.Size(695, 337);
             this.dgv1.TabIndex = 8;
+            this.dgv1.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv1_CellContentClick);
             this.dgv1.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dgv1_CellFormatting);
             // 
             // mastercard_no
