@@ -216,7 +216,7 @@ namespace MasterCardTracker
             this.button1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.button1.Location = new System.Drawing.Point(399, 78);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(87, 52);
+            this.button1.Size = new System.Drawing.Size(96, 52);
             this.button1.TabIndex = 12;
             this.button1.Text = "View History";
             this.button1.UseVisualStyleBackColor = true;
@@ -225,7 +225,7 @@ namespace MasterCardTracker
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(709, 99);
+            this.label10.Location = new System.Drawing.Point(640, 117);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(41, 13);
             this.label10.TabIndex = 14;
@@ -235,9 +235,9 @@ namespace MasterCardTracker
             // button2
             // 
             this.button2.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button2.Location = new System.Drawing.Point(501, 78);
+            this.button2.Location = new System.Drawing.Point(513, 78);
             this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(87, 52);
+            this.button2.Size = new System.Drawing.Size(96, 52);
             this.button2.TabIndex = 15;
             this.button2.Text = "Check Workorder";
             this.button2.UseVisualStyleBackColor = true;
@@ -247,7 +247,7 @@ namespace MasterCardTracker
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 405);
+            this.ClientSize = new System.Drawing.Size(697, 405);
             this.Controls.Add(this.button2);
             this.Controls.Add(this.label10);
             this.Controls.Add(this.button1);

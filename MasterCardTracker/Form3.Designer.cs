@@ -78,6 +78,7 @@ namespace MasterCardTracker
             this.textBox2.Name = "textBox2";
             this.textBox2.Size = new System.Drawing.Size(200, 24);
             this.textBox2.TabIndex = 13;
+            this.textBox2.TextChanged += new System.EventHandler(this.textBox2_TextChanged);
             // 
             // dgv1
             // 
@@ -91,7 +92,7 @@ namespace MasterCardTracker
             this.dgv1.Cursor = System.Windows.Forms.Cursors.Default;
             this.dgv1.Location = new System.Drawing.Point(16, 156);
             this.dgv1.Name = "dgv1";
-            this.dgv1.Size = new System.Drawing.Size(585, 241);
+            this.dgv1.Size = new System.Drawing.Size(544, 241);
             this.dgv1.TabIndex = 15;
             this.dgv1.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dgv1_CellFormatting);
             // 
@@ -134,7 +135,7 @@ namespace MasterCardTracker
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(616, 413);
+            this.ClientSize = new System.Drawing.Size(575, 413);
             this.Controls.Add(this.dgv1);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.textBox2);

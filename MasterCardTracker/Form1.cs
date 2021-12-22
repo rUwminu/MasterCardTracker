@@ -69,7 +69,7 @@ namespace MasterCardTracker
 
             if(valid)
             {
-                label3.Text = "Done Checkin. MasterCard Update to this deparment.";
+                label3.Text = "Done Check-in to this deparment.";
                 label3.ForeColor = System.Drawing.Color.Green;
             }
             else

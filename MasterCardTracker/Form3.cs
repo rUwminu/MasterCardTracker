@@ -81,20 +81,15 @@ namespace MasterCardTracker
         public async void getWoInProcess(string masc)
         {
             await Task.Delay(1000);
-
+           
             dt.Clear();
             dgv1.Refresh();
 
             try
             {
-                string woallsql = "SELECT plastic.wo.PO as wopo, plastic.wo.COMP as wocomp, plastic.masterc.mascNo as womasc, plastic.woplan.machineid as woplan " +
-                               "FROM plastic.woplan " +
-                               "LEFT JOIN plastic.wo ON plastic.woplan.woitemid = plastic.wo.ID " +
-                               "LEFT JOIN plastic.masterc ON plastic.woplan.mascid = plastic.masterc.ID " +
-                               "WHERE plastic.masterc.mascNo = '" + masc + "' " +
-                               "ORDER BY plastic.woplan.id DESC LIMIT 10 ";
-
-                string woallsql2 = "SELECT plastic.wo.PO as wopo, plastic.woitem.item as wopoitem, plastic.wo.COMP as wocomp, plastic.masterc.mascNo as womasc, plastic.woplan.machineid as woplan " +
+                // Search all Workorder with Mastercard No and list 10 newest workorder with Inserted mastercard no.
+                // Show newest 10 regardless the workoreder is in plan or not
+                string woallsql2 = "SELECT plastic.wo.PO as wopo, plastic.woitem.item as wopoitem, plastic.woplan.finishBy as wocomp, plastic.masterc.mascNo as womasc, plastic.woplan.machineid as woplan " +
                                "FROM plastic.wo " +
                                "LEFT JOIN plastic.woitem ON plastic.wo.ID = plastic.woitem.woId " +
                                "LEFT JOIN plastic.woplan ON plastic.woitem.id = plastic.woplan.woitemid " +
@@ -102,7 +97,15 @@ namespace MasterCardTracker
                                "WHERE plastic.masterc.mascNo = '" + masc + "' " +
                                "ORDER BY plastic.wo.ID DESC LIMIT 10 ";
 
-                cmd = new MySqlCommand(woallsql2, conn);
+                string woallsql3 = "SELECT plastic.wo.PO as wopo, plastic.woitem.item as wopoitem, plastic.woplan.finishBy as wocomp, plastic.masterc.mascNo as womasc, plastic.woplan.machineid as woplan " +
+                               "FROM plastic.woplan " +
+                               "LEFT JOIN plastic.woitem ON plastic.woplan.woitemid = plastic.woitem.id " +
+                               "LEFT JOIN plastic.masterc ON plastic.woplan.mascid = plastic.masterc.ID " +
+                               "LEFT JOIN plastic.wo ON plastic.woitem.woId = plastic.wo.ID " +
+                               "WHERE plastic.masterc.mascNo = '" + masc + "' " +
+                               "ORDER BY plastic.woplan.id DESC LIMIT 10 ";
+
+                cmd = new MySqlCommand(woallsql3, conn);
 
                 conn.Open();
 
@@ -132,9 +135,25 @@ namespace MasterCardTracker
             timer = new System.Threading.Timer(TimerElapsed, null, VALIDATION_DELAY, VALIDATION_DELAY);
         }
 
+        private void textBox2_TextChanged(object sender, EventArgs e)
+        {
+            TextBox origin = sender as TextBox;
+            if (!origin.ContainsFocus)
+                return;
+
+            DisposeTimer();
+            timer = new System.Threading.Timer(TimerElapsed2, null, VALIDATION_DELAY, VALIDATION_DELAY);
+        }
+
         private void TimerElapsed(Object obj)
         {
             ActionOnCompleteInput();
+            DisposeTimer();
+        }
+
+        private void TimerElapsed2(Object obj)
+        {
+            ActionOnCompleteInput2();
             DisposeTimer();
         }
 
@@ -167,28 +186,33 @@ namespace MasterCardTracker
             ));
         }
 
+        private void ActionOnCompleteInput2()
+        {
+            this.Invoke(new Action(() =>
+            {
+                if (textBox2.Text != "")
+                {
+                    var masterinput = textBox2.Text;
+
+                    getWoInProcess(masterinput);
+                }
+            }
+            ));
+        }
+
         public void dgv1_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
             try
             {
                 foreach (DataGridViewRow myRow in dgv1.Rows)
                 {
-                    if (Convert.ToString(myRow.Cells[2].Value) != null)
+                    if (Convert.ToString(myRow.Cells[2].Value) == null || Convert.ToString(myRow.Cells[2].Value) == "")
                     {
-                        if (Convert.ToInt32(myRow.Cells[2].Value) > 0)
-                        {
-                            // HightLight row with background color
-                            //myRow.DefaultCellStyle.BackColor = Color.ForestGreen;
-
-                            // HightLight selected cell in row with background color
-                            myRow.Cells[2].Style.BackColor = Color.ForestGreen;
-                        }
-                        else if (Convert.ToInt32(myRow.Cells[2].Value) <= 0)
-                        {
-                            //myRow.DefaultCellStyle.BackColor = Color.RoyalBlue;
-                            myRow.Cells[2].Style.BackColor = Color.Crimson;
-
-                        }
+                        // HightLight row with background color
+                        //myRow.DefaultCellStyle.BackColor = Color.ForestGreen;
+                        myRow.Cells[2].Style.BackColor = Color.Crimson;
+                    } else {
+                        myRow.Cells[2].Style.BackColor = Color.ForestGreen;
                     }
                 }
             }
@@ -197,5 +221,7 @@ namespace MasterCardTracker
                 Console.WriteLine(ex);
             }
         }
+
+        
     }
 }
