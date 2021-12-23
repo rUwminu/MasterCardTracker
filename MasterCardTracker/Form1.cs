@@ -24,8 +24,8 @@ namespace MasterCardTracker
 
         // This change according to user department, change depend on different user login
         // Example user is cutting department
-         string initialstate = "Extrusion";
-        // string initialstate = "Printing";
+        // string initialstate = "Extrusion";
+         string initialstate = "Printing";
         // string initialstate = "Cutting";
         // string initialstate = "Planning";
 
@@ -86,14 +86,16 @@ namespace MasterCardTracker
             bool isCheck = false;
             var splitted = textBox1.Text.Split('-');
             string pono = splitted[0];
+            string item = splitted[1];
 
             string query = "SELECT plastic.masterc_record.mcr_no, plastic.masterc_record.mcr_location, plastic.wo.PO, plastic.masterc.mascNo, plastic.masterc_record.mcr_status " +
                             "FROM plastic.wo " +
                             "LEFT JOIN plastic.masterc ON plastic.wo.MASCID = plastic.masterc.ID " +
                             "LEFT JOIN plastic.masterc_record ON plastic.masterc.mascNo = plastic.masterc_record.mcr_no " +
-                            //"LEFT JOIN plastic.woitem ON plastic.wo.ID = plastic.woitem.woId " +
-                            //"LEFT JOIN ( SELECT * FROM plastic.woplan ) AS b ON plastic.woitem.id = b.woitemid " +
-                            "WHERE plastic.wo.PO = '" + pono + "' AND NOT plastic.masterc_record.mcr_status = 'Invalid' " +
+                            "LEFT JOIN plastic.woitem ON plastic.wo.ID = plastic.woitem.woId " +
+                            "LEFT JOIN plastic.woplan ON plastic.woitem.id = plastic.woplan.woitemid " +
+                            "WHERE plastic.wo.PO = '" + pono + "' AND plastic.woitem.item = '" + item + "' " +
+                            "AND NOT plastic.masterc_record.mcr_status = 'Invalid' " +
                             "ORDER BY plastic.masterc_record.id DESC LIMIT 1";
 
             try
@@ -244,7 +246,7 @@ namespace MasterCardTracker
                            "FROM plastic.wo " +
                            "LEFT JOIN plastic.masterc ON plastic.wo.MASCID = plastic.masterc.ID " +
                            "LEFT JOIN plastic.woitem ON plastic.wo.ID = plastic.woitem.woId " +
-                           "LEFT JOIN ( SELECT * FROM plastic.woplan ) AS b ON plastic.woitem.id = b.woitemid " +
+                           "LEFT JOIN plastic.woplan  ON plastic.woitem.id = plastic.woplan.woitemid " +
                            "WHERE plastic.wo.PO = '" + pono + "' ";
 
             try
@@ -352,24 +354,25 @@ namespace MasterCardTracker
                         string pono = splitted[0];
                         string item = splitted[1];
 
-                        timer.Dispose();                        
+                        timer.Dispose();
                         //loaddata(pono);
 
                         // Query to check is the wo/master card have this process
                         string woprocesssql = "SELECT plastic.wo.PO, plastic.parat.code, plastic.masterc.mascNo, plastic.wo.COMP " +
                                               "FROM plastic.wo " +
                                               "LEFT JOIN plastic.masterc ON plastic.wo.MASCID = plastic.masterc.ID " +
+                                              "LEFT JOIN plastic.woplan ON plastic.wo.MASCID = plastic.woplan.mascid " +
                                               "LEFT JOIN plastic.planwoprocess ON plastic.wo.MASCID = plastic.planwoprocess.mascid " +
                                               "LEFT JOIN plastic.parat ON plastic.planwoprocess.paratId = plastic.parat.id " +
-                                              "WHERE plastic.wo.PO = '" + pono + "' ";
-
+                                              "WHERE plastic.wo.PO = '" + pono + "' " +
+                                              "AND plastic.woplan.hideBy = '0' ";
 
                         getAllWoProcess(woprocesssql);
                     }
                     catch (Exception ex)
                     {
                         timer.Dispose();
-                        MessageBox.Show(string.Format("Invalid Workoreder Number"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(string.Format("Invalid Workoreder Or This Workorder is completed"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
             }
@@ -471,7 +474,7 @@ namespace MasterCardTracker
             catch (Exception ex)
             {
                 timer.Dispose();
-                MessageBox.Show(string.Format("Invalid Workoreder Number"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(string.Format("Invalid Workoreder Or This Workorder is completed"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             } finally
             {
                 conn.Close();
@@ -516,6 +519,7 @@ namespace MasterCardTracker
             // Console writeline possible process step
             foreach(var item in arr)
             {
+                Console.WriteLine("Any items?");
                 Console.WriteLine(item);
             }
 

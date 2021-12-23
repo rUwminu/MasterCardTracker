@@ -89,20 +89,12 @@ namespace MasterCardTracker
             {
                 // Search all Workorder with Mastercard No and list 10 newest workorder with Inserted mastercard no.
                 // Show newest 10 regardless the workoreder is in plan or not
-                string woallsql2 = "SELECT plastic.wo.PO as wopo, plastic.woitem.item as wopoitem, plastic.woplan.finishBy as wocomp, plastic.masterc.mascNo as womasc, plastic.woplan.machineid as woplan " +
-                               "FROM plastic.wo " +
-                               "LEFT JOIN plastic.woitem ON plastic.wo.ID = plastic.woitem.woId " +
-                               "LEFT JOIN plastic.woplan ON plastic.woitem.id = plastic.woplan.woitemid " +
-                               "LEFT JOIN plastic.masterc ON plastic.wo.MASCID = plastic.masterc.ID " +
-                               "WHERE plastic.masterc.mascNo = '" + masc + "' " +
-                               "ORDER BY plastic.wo.ID DESC LIMIT 10 ";
-
                 string woallsql3 = "SELECT plastic.wo.PO as wopo, plastic.woitem.item as wopoitem, plastic.woplan.finishBy as wocomp, plastic.masterc.mascNo as womasc, plastic.woplan.machineid as woplan " +
                                "FROM plastic.woplan " +
                                "LEFT JOIN plastic.woitem ON plastic.woplan.woitemid = plastic.woitem.id " +
                                "LEFT JOIN plastic.masterc ON plastic.woplan.mascid = plastic.masterc.ID " +
                                "LEFT JOIN plastic.wo ON plastic.woitem.woId = plastic.wo.ID " +
-                               "WHERE plastic.masterc.mascNo = '" + masc + "' " +
+                               "WHERE plastic.masterc.mascNo = '" + masc + "' AND NOT plastic.woitem.proDel = 'D' " +
                                "ORDER BY plastic.woplan.id DESC LIMIT 10 ";
 
                 cmd = new MySqlCommand(woallsql3, conn);
@@ -111,7 +103,7 @@ namespace MasterCardTracker
 
                 using (MySqlDataAdapter da = new MySqlDataAdapter(cmd))
                 {
-                    Console.WriteLine("Is this running?");
+                    // Console.WriteLine("Is this running?");
                     da.Fill(dt);
                 }
 
