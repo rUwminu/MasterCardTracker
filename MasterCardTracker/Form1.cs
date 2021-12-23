@@ -25,8 +25,8 @@ namespace MasterCardTracker
         // This change according to user department, change depend on different user login
         // Example user is cutting department
         // string initialstate = "Extrusion";
-         string initialstate = "Printing";
-        // string initialstate = "Cutting";
+        // string initialstate = "Printing";
+         string initialstate = "Cutting";
         // string initialstate = "Planning";
 
         static int VALIDATION_DELAY = 1500;
@@ -46,12 +46,12 @@ namespace MasterCardTracker
             conn.ConnectionString = "server=localhost;uid=root; pwd=CBS12345678.; database=plastic; Convert Zero Datetime=True; Allow Zero Datetime=True; default command timeout=300; ";
         }
 
-        public async void saveHistory(string MSid, string WOid, string location, string status, bool valid, int delay)
+        public async void saveHistory(string MSid, string WOid, string WOitem, string location, string status, bool valid, int delay)
         {
             // Delay This task for last task to complete sql read and connection to close *Testing Beta
             await Task.Delay(delay);
 
-            string insertinfo = "INSERT INTO plastic.masterc_record(mcr_no, mcr_wo_no, mcr_location, mcr_datetime, mcr_status) VALUES (@mcr_no, @mcr_wo_no, @mcr_location, @mcr_datetime, @mcr_status)";
+            string insertinfo = "INSERT INTO plastic.masterc_record(mcr_no, mcr_wo_no, mcr_wo_no_item, mcr_location, mcr_datetime, mcr_status) VALUES (@mcr_no, @mcr_wo_no, @mcr_wo_no_item, @mcr_location, @mcr_datetime, @mcr_status)";
 
             conn.Open();
 
@@ -59,6 +59,7 @@ namespace MasterCardTracker
 
             upcmd.Parameters.AddWithValue("@mcr_no", MSid);
             upcmd.Parameters.AddWithValue("@mcr_wo_no", WOid);
+            upcmd.Parameters.AddWithValue("@mcr_wo_no_item", WOitem);
             upcmd.Parameters.AddWithValue("@mcr_location", location);
             upcmd.Parameters.AddWithValue("@mcr_datetime", dateTime.ToString("yyyy-MM-dd hh:mm:ss"));
             upcmd.Parameters.AddWithValue("@mcr_status", status);
@@ -206,7 +207,7 @@ namespace MasterCardTracker
                         Console.WriteLine("Trigger new save?");
                         // It check the master record for any result, new wo will not be in master record. Then trigger this
                         // If is new workorder pass down to production, this function run and record
-                        getNewWoDataAndSave(pono);
+                        getNewWoDataAndSave(pono, item);
                         return;
                     }
 
@@ -217,8 +218,8 @@ namespace MasterCardTracker
                 if(isCheck == true)
                 {
                     //Console.WriteLine("Trigger Save In Out");
-                    saveHistory(msid, woid, initialstate, "IN", true, 500);
-                    saveHistory(msid, woid, lastlocation, "OUT", true, 300);                                     
+                    saveHistory(msid, woid, item, initialstate, "IN", true, 500);
+                    saveHistory(msid, woid, item, lastlocation, "OUT", true, 300);                                     
                 }
 
                 return;
@@ -235,7 +236,7 @@ namespace MasterCardTracker
             
         }
 
-        public async void getNewWoDataAndSave(string pono)
+        public async void getNewWoDataAndSave(string pono, string item)
         {
             await Task.Delay(300);
 
@@ -270,7 +271,7 @@ namespace MasterCardTracker
                 }
                 conn.Close();
 
-                saveHistory(msid, woid, initialstate, "IN", true, 500);
+                saveHistory(msid, woid, item, initialstate, "IN", true, 500);
 
                 return;
             }
@@ -358,16 +359,17 @@ namespace MasterCardTracker
                         //loaddata(pono);
 
                         // Query to check is the wo/master card have this process
-                        string woprocesssql = "SELECT plastic.wo.PO, plastic.parat.code, plastic.masterc.mascNo, plastic.wo.COMP " +
+                        string woprocesssql = "SELECT plastic.wo.PO, plastic.parat.code, plastic.masterc.mascNo, plastic.woplan.hideBy " +
                                               "FROM plastic.wo " +
                                               "LEFT JOIN plastic.masterc ON plastic.wo.MASCID = plastic.masterc.ID " +
                                               "LEFT JOIN plastic.woplan ON plastic.wo.MASCID = plastic.woplan.mascid " +
+                                              "LEFT JOIN plastic.woitem ON plastic.wo.ID = plastic.woitem.woId " +
                                               "LEFT JOIN plastic.planwoprocess ON plastic.wo.MASCID = plastic.planwoprocess.mascid " +
                                               "LEFT JOIN plastic.parat ON plastic.planwoprocess.paratId = plastic.parat.id " +
-                                              "WHERE plastic.wo.PO = '" + pono + "' " +
-                                              "AND plastic.woplan.hideBy = '0' ";
+                                              "WHERE plastic.wo.PO = '" + pono + "' AND plastic.woitem.item = '" + item + "' ";
+                                              //"AND plastic.woplan.hideBy = '0' ";
 
-                        getAllWoProcess(woprocesssql);
+                        getAllWoProcess(woprocesssql, item);
                     }
                     catch (Exception ex)
                     {
@@ -412,7 +414,7 @@ namespace MasterCardTracker
         }
 
 
-        public void getAllWoProcess(string query)
+        public void getAllWoProcess(string query, string item)
         {
             List<string> proccessStep = new List<string>();
             List<WoProcess> all = new List<WoProcess>();
@@ -444,7 +446,7 @@ namespace MasterCardTracker
                                 all.Add(new WoProcess(values[0].ToString(), values[1].ToString(), values[2].ToString()));
                             } 
                         }
-                    }
+                    } 
                     reader.Close();
                 }
                 conn.Close();
@@ -460,15 +462,15 @@ namespace MasterCardTracker
                     proccessStep.Add(wolist.process);
                 }
 
-                if(isComp != "1")
+                if(isComp == "0")
                 {
                     // Run function to check the wo process step have process with current department
-                    checkProcessStepHaveStepInDepartment(tempArr[0].wopo.ToString(), tempArr[0].masterc.ToString(), proccessStep.ToArray());
+                    checkProcessStepHaveStepInDepartment(tempArr[0].wopo.ToString(), item, tempArr[0].masterc.ToString(), proccessStep.ToArray());
                 }
                 else
                 {
                     MessageBox.Show(string.Format("This Workorder Already Completed, Please Return To Planner!"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    saveHistory(tempArr[0].masterc.ToString(), tempArr[0].wopo.ToString(), initialstate, "Invalid", true, 500);
+                    saveHistory(tempArr[0].masterc.ToString(), tempArr[0].wopo.ToString(), item, initialstate, "Invalid", true, 500);
                 }      
             } 
             catch (Exception ex)
@@ -481,7 +483,7 @@ namespace MasterCardTracker
             }
         }
 
-        public void checkProcessStepHaveStepInDepartment (string wopo, string masc, string[] arr)
+        public void checkProcessStepHaveStepInDepartment (string wopo, string itemno, string masc, string[] arr)
         {
             int i, j;
             string[] stepInDepart;
@@ -510,7 +512,7 @@ namespace MasterCardTracker
             // Last or Return Mastercard to Admin/Planner/CS, just record the info.
             if (initialstate == "Planning")
             {
-                saveHistory(masc, wopo, initialstate, "IN", true, 300);
+                saveHistory(masc, wopo, itemno, initialstate, "IN", true, 300);
                 return;
             }
 
@@ -519,7 +521,6 @@ namespace MasterCardTracker
             // Console writeline possible process step
             foreach(var item in arr)
             {
-                Console.WriteLine("Any items?");
                 Console.WriteLine(item);
             }
 
@@ -542,14 +543,14 @@ namespace MasterCardTracker
             }
 
             // IF no match step in department array, prompt alert and save the scan location for record
-            saveHistory(masc, wopo, initialstate, "Invalid", false, 300);
+            saveHistory(masc, wopo, itemno, initialstate, "Invalid", false, 300);
             MessageBox.Show(string.Format("This Workorder Doesn't Have This Process, Please Return The Workorder To Last Deparment!"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return; 
         }
 
         public void loaddata(string pono)
         {
-            string woallsql = "SELECT plastic.masterc_record.mcr_no as msno, plastic.masterc_record.mcr_wo_no as wono, plastic.masterc_record.mcr_location as mslocation, plastic.masterc_record.mcr_datetime as msdate, plastic.masterc_record.mcr_status as msstatus " +
+            string woallsql = "SELECT plastic.masterc_record.mcr_no as msno, plastic.masterc_record.mcr_wo_no as wono, plastic.masterc_record.mcr_wo_no_item as poitem, plastic.masterc_record.mcr_location as mslocation, plastic.masterc_record.mcr_datetime as msdate, plastic.masterc_record.mcr_status as msstatus " +
                 "FROM plastic.masterc_record " +
                 "WHERE plastic.masterc_record.mcr_wo_no = '" + pono + "' " +
                 "ORDER BY plastic.masterc_record.id DESC";
@@ -582,9 +583,9 @@ namespace MasterCardTracker
             {
                 foreach (DataGridViewRow myRow in dgv1.Rows)
                 {
-                    if (Convert.ToString(myRow.Cells[4].Value) != null)
+                    if (Convert.ToString(myRow.Cells[5].Value) != null)
                     {
-                        if (Convert.ToString(myRow.Cells[4].Value) == "IN")
+                        if (Convert.ToString(myRow.Cells[5].Value) == "IN")
                         {
                             // HightLight row with background color
                             //myRow.DefaultCellStyle.BackColor = Color.ForestGreen;
@@ -592,13 +593,13 @@ namespace MasterCardTracker
                             // HightLight selected cell in row with background color
                             myRow.Cells["Status"].Style.BackColor = Color.ForestGreen;
                         }
-                        else if (Convert.ToString(myRow.Cells[4].Value) == "OUT")
+                        else if (Convert.ToString(myRow.Cells[5].Value) == "OUT")
                         {
                             //myRow.DefaultCellStyle.BackColor = Color.RoyalBlue;
                             myRow.Cells["Status"].Style.BackColor = Color.RoyalBlue;
 
                         }
-                        else if (Convert.ToString(myRow.Cells[4].Value) == "Invalid")
+                        else if (Convert.ToString(myRow.Cells[5].Value) == "Invalid")
                         {
                             //myRow.DefaultCellStyle.BackColor = Color.Crimson;
                             myRow.Cells["Status"].Style.BackColor = Color.Crimson;
