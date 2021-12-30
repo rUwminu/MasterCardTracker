@@ -89,10 +89,11 @@ namespace MasterCardTracker
             {
                 // Search all Workorder with Mastercard No and list 10 newest workorder with Inserted mastercard no.
                 // Show newest 10 regardless the workoreder is in plan or not
-                string woallsql3 = "SELECT plastic.wo.PO as wopo, plastic.woitem.item as wopoitem, plastic.woplan.hideBy as wocomp, plastic.masterc.mascNo as womasc, plastic.woplan.machineid as woplan " +
+                string woallsql3 = "SELECT plastic.wo.PO as wopo, plastic.woitem.item as wopoitem, LTRIM(plastic.woplan.hideBy) as wocomp, plastic.masterc.mascNo as womasc, plastic.machine.MC as woplan " +
                                "FROM plastic.woplan " +
                                "LEFT JOIN plastic.woitem ON plastic.woplan.woitemid = plastic.woitem.id " +
                                "LEFT JOIN plastic.masterc ON plastic.woplan.mascid = plastic.masterc.ID " +
+                               "LEFT JOIN plastic.machine ON plastic.woplan.machineid = plastic.machine.ID " +
                                "LEFT JOIN plastic.wo ON plastic.woitem.woId = plastic.wo.ID " +
                                "WHERE plastic.masterc.mascNo = '" + masc + "' AND NOT plastic.woitem.proDel = 'D' " +
                                "ORDER BY plastic.woplan.id DESC LIMIT 20 ";
@@ -198,14 +199,29 @@ namespace MasterCardTracker
             {
                 foreach (DataGridViewRow myRow in dgv1.Rows)
                 {
-                    if (Convert.ToString(myRow.Cells[2].Value) == null || Convert.ToString(myRow.Cells[2].Value) == "0")
+                    if (Convert.ToString(myRow.Cells[2].Value) != null)
                     {
-                        // HightLight row with background color
-                        //myRow.DefaultCellStyle.BackColor = Color.ForestGreen;
-                        myRow.Cells[2].Style.BackColor = Color.Crimson;
+                        if(Convert.ToString(myRow.Cells[2].Value) == "0")
+                        {
+                            // HightLight row with background color
+                            //myRow.DefaultCellStyle.BackColor = Color.ForestGreen;
+                            myRow.Cells[2].Value = "In Progress";
+                            myRow.Cells[2].Style.ForeColor = Color.White;
+                            myRow.Cells[2].Style.BackColor = Color.Crimson;
+                            myRow.Cells[2].Style.Font = new Font("Tahoma", 11, FontStyle.Bold);
+                        } 
+                        else
+                        {
+                            myRow.Cells[2].Value = "Completed";
+                            myRow.Cells[2].Style.ForeColor = Color.White;
+                            myRow.Cells[2].Style.BackColor = Color.ForestGreen;
+                            myRow.Cells[2].Style.Font = new Font("Tahoma", 11, FontStyle.Bold);
+                        }
+                        
                     } else {
-                        myRow.Cells[2].Style.BackColor = Color.ForestGreen;
+                        myRow.Cells[2].Style.BackColor = Color.Crimson;
                     }
+
                 }
             }
             catch (Exception ex)
@@ -214,6 +230,6 @@ namespace MasterCardTracker
             }
         }
 
-        
+
     }
 }
