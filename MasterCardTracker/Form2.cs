@@ -156,12 +156,15 @@ namespace MasterCardTracker
 
         public void GetByWOnDateHistory()
         {
+            var splitted = textBox1.Text.Split('-');
+            string pono = splitted[0];
+
             dt.Clear();
             dgv1.Refresh();
 
             string woallsql = "SELECT plastic.masterc_record.mcr_no as msno, plastic.masterc_record.mcr_wo_no as wono, plastic.masterc_record.mcr_location as mslocation, plastic.masterc_record.mcr_datetime as msdate, plastic.masterc_record.mcr_status as msstatus " +
                                 "FROM plastic.masterc_record " +
-                                "WHERE plastic.masterc_record.mcr_no = '" + label3.Text + "' AND DATE(plastic.masterc_record.mcr_datetime) = '" + dateTimePicker1.Text + "' " +
+                                "WHERE plastic.masterc_record.mcr_wo_no = '" + pono + "' AND DATE(plastic.masterc_record.mcr_datetime) = '" + dateTimePicker1.Text + "' " +
                                 "ORDER BY plastic.masterc_record.id DESC";
 
 
