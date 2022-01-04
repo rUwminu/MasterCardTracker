@@ -204,7 +204,7 @@ namespace MasterCardTracker
 
                     if (!reader.HasRows)
                     {
-                        Console.WriteLine("Trigger new save?");
+                        // Console.WriteLine("Trigger new save?");
                         // It check the master record for any result, new wo will not be in master record. Then trigger this
                         // If is new workorder pass down to production, this function run and record
                         getNewWoDataAndSave(pono, item);
@@ -371,7 +371,7 @@ namespace MasterCardTracker
 
                         getAllWoProcess(woprocesssql, item);
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         timer.Dispose();
                         MessageBox.Show(string.Format("Invalid Workoreder Or This Workorder is completed"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -473,7 +473,7 @@ namespace MasterCardTracker
                     saveHistory(tempArr[0].masterc.ToString(), tempArr[0].wopo.ToString(), item, initialstate, "Invalid", true, 500);
                 }      
             } 
-            catch (Exception ex)
+            catch (Exception)
             {
                 timer.Dispose();
                 MessageBox.Show(string.Format("Invalid Workoreder Or This Workorder is completed"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);

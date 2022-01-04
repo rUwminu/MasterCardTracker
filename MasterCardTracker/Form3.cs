@@ -112,6 +112,8 @@ namespace MasterCardTracker
                 dgv1.DataMember = dt.TableName;
 
                 conn.Close();
+
+                formatDataGridViewCellValue();
             } catch( Exception ex)
             {
                 MessageBox.Show(string.Format("An error occurred {0}", ex.Message), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -193,43 +195,43 @@ namespace MasterCardTracker
             ));
         }
 
-        public void dgv1_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+        public void formatDataGridViewCellValue()
         {
-            try
+            string originalCellValue;
+            string reformattedCellValue;
+
+            foreach (DataGridViewRow myRow in dgv1.Rows)
             {
-                foreach (DataGridViewRow myRow in dgv1.Rows)
+                if (Convert.ToString(myRow.Cells[2].Value) != null)
                 {
-                    if (Convert.ToString(myRow.Cells[2].Value) != null)
+                    originalCellValue = Convert.ToString(myRow.Cells[2].Value);
+
+                    if (originalCellValue == "0")
                     {
-                        if(Convert.ToString(myRow.Cells[2].Value) == "0")
-                        {
-                            // HightLight row with background color
-                            //myRow.DefaultCellStyle.BackColor = Color.ForestGreen;
-                            myRow.Cells[2].Value = "In Progress";
-                            myRow.Cells[2].Style.ForeColor = Color.White;
-                            myRow.Cells[2].Style.BackColor = Color.Crimson;
-                            myRow.Cells[2].Style.Font = new Font("Tahoma", 11, FontStyle.Bold);
-                        } 
-                        else
-                        {
-                            myRow.Cells[2].Value = "Completed";
-                            myRow.Cells[2].Style.ForeColor = Color.White;
-                            myRow.Cells[2].Style.BackColor = Color.ForestGreen;
-                            myRow.Cells[2].Style.Font = new Font("Tahoma", 11, FontStyle.Bold);
-                        }
-                        
-                    } else {
+                        reformattedCellValue = "In Progress";
+
+                        myRow.Cells[2].Value = reformattedCellValue;
+                        myRow.Cells[2].Style.ForeColor = Color.White;
                         myRow.Cells[2].Style.BackColor = Color.Crimson;
+                        myRow.Cells[2].Style.Font = new Font("Tahoma", 11, FontStyle.Bold);
+                    }
+                    else
+                    {
+                        reformattedCellValue = "Complete";
+
+                        myRow.Cells[2].Value = reformattedCellValue;
+                        myRow.Cells[2].Style.ForeColor = Color.White;
+                        myRow.Cells[2].Style.BackColor = Color.ForestGreen;
+                        myRow.Cells[2].Style.Font = new Font("Tahoma", 11, FontStyle.Bold);
                     }
 
                 }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
+                else
+                {
+                    myRow.Cells[2].Style.BackColor = Color.Crimson;
+                }
+
             }
         }
-
-
     }
 }
