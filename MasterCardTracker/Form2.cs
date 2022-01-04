@@ -30,7 +30,7 @@ namespace MasterCardTracker
             dateTimePicker1.CustomFormat = "yyyy-MM-dd";
 
             conn = new MySqlConnection();
-            conn.ConnectionString = "server=localhost;uid=root; pwd=CBS12345678.; database=plastic; Convert Zero Datetime=True; Allow Zero Datetime=True; default command timeout=300; ";
+            conn.ConnectionString = "server=localhost;uid=root; pwd=123456; database=plastic; Convert Zero Datetime=True; Allow Zero Datetime=True; default command timeout=300; ";
         }
 
         private void Form2_Load(object sender, EventArgs e)
