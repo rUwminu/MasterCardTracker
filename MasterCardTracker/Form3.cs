@@ -195,8 +195,10 @@ namespace MasterCardTracker
             ));
         }
 
-        public void formatDataGridViewCellValue()
+        public async void formatDataGridViewCellValue()
         {
+            await Task.Delay(1000);
+
             string originalCellValue;
             string reformattedCellValue;
 
