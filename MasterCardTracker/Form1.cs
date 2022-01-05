@@ -26,8 +26,8 @@ namespace MasterCardTracker
         // Example user is cutting department
         // string initialstate = "Extrusion";
         // string initialstate = "Printing";
-         string initialstate = "Cutting";
-        // string initialstate = "Planning";
+        // string initialstate = "Cutting";
+         string initialstate = "Planning";
 
         static int VALIDATION_DELAY = 1500;
         System.Threading.Timer timer = null;
@@ -36,7 +36,7 @@ namespace MasterCardTracker
         string msid;
         string woid;
         string lastlocation;
-        string proccessStep;
+        string InOutStatus;
 
         public Form1()
         {
@@ -75,172 +75,220 @@ namespace MasterCardTracker
             }
             else
             {
-                label3.Text = "Workorder Don't have this process";
+                label3.Text = "Checking Error";
                 label3.ForeColor = System.Drawing.Color.Red;
             }
         }
 
         private void getWOData ()
         {
-            Console.WriteLine("Running Checking");
-
-            bool isCheck = false;
-            var splitted = textBox1.Text.Split('-');
-            string pono = splitted[0];
-            string item = splitted[1];
-
-            string query = "SELECT plastic.masterc_record.mcr_no, plastic.masterc_record.mcr_location, plastic.wo.PO, plastic.masterc.mascNo, plastic.masterc_record.mcr_status " +
-                            "FROM plastic.wo " +
-                            "LEFT JOIN plastic.masterc ON plastic.wo.MASCID = plastic.masterc.ID " +
-                            "LEFT JOIN plastic.masterc_record ON plastic.masterc.mascNo = plastic.masterc_record.mcr_no " +
-                            "LEFT JOIN plastic.woitem ON plastic.wo.ID = plastic.woitem.woId " +
-                            "LEFT JOIN plastic.woplan ON plastic.woitem.id = plastic.woplan.woitemid " +
-                            "WHERE plastic.wo.PO = '" + pono + "' AND plastic.woitem.item = '" + item + "' " +
-                            "AND NOT plastic.masterc_record.mcr_status = 'Invalid' " +
-                            "ORDER BY plastic.masterc_record.id DESC LIMIT 1";
+            Console.WriteLine("Running Get Workorder Details");
 
             try
             {
-                cmd = new MySqlCommand(query, conn);
+                bool isCheck = false;
+                var splitted = textBox1.Text.Split('-');
+                string pono = splitted[0];
+                string item = splitted[1];
 
-                conn.Open();
+                string query = "SELECT plastic.masterc_record.mcr_no, plastic.masterc_record.mcr_location, plastic.wo.PO, plastic.masterc.mascNo, plastic.masterc_record.mcr_status " +
+                                "FROM plastic.wo " +
+                                "LEFT JOIN plastic.masterc ON plastic.wo.MASCID = plastic.masterc.ID " +
+                                "LEFT JOIN plastic.masterc_record ON plastic.masterc.mascNo = plastic.masterc_record.mcr_no " +
+                                "LEFT JOIN plastic.woitem ON plastic.wo.ID = plastic.woitem.woId " +
+                                "LEFT JOIN plastic.woplan ON plastic.woitem.id = plastic.woplan.woitemid " +
+                                "WHERE plastic.wo.PO = '" + pono + "' AND plastic.woitem.item = '" + item + "' " +
+                                "AND NOT plastic.masterc_record.mcr_status = 'Invalid' " +
+                                "ORDER BY plastic.masterc_record.id DESC LIMIT 1";
 
-                using (MySqlDataReader reader = cmd.ExecuteReader())
+                try
                 {
-                    // Always reset the value to false
-                    isCheck = false;
+                    cmd = new MySqlCommand(query, conn);
 
-                    // Check record is the workorder have any pass record
-                    if (reader.HasRows){
-                        //Console.WriteLine("Have Row?");
-                        while (reader.Read())
+                    conn.Open();
+
+                    using (MySqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        // Always reset the value to false
+                        isCheck = false;
+
+                        // Check record is the workorder have any pass record
+                        if (reader.HasRows)
                         {
-                            msid = reader[3].ToString();
-                            woid = reader[2].ToString();
-                            lastlocation = reader[1].ToString();
-                            proccessStep = reader[4].ToString();
-                            //string msStatus = reader[5].ToString(); // **Not in use yet**
-                            label4.Text = msid;
-                            label6.Text = lastlocation;
-                            label9.Text = proccessStep;                         
-
-                            // This if/else check user department and the posible Workorder can pass to this user deparment
-                            if (initialstate == "Final")
+                            //Console.WriteLine("Have Row?");
+                            while (reader.Read())
                             {
-                                if (msid != "" && lastlocation == initialstate && pono == woid)
-                                {
-                                    label3.Text = "MasterCard Already Here.";
-                                    label3.ForeColor = System.Drawing.Color.Green;                                    
+                                msid = reader[3].ToString();
+                                woid = reader[2].ToString();
+                                lastlocation = reader[1].ToString();
+                                InOutStatus = reader[4].ToString();
+                                //string msStatus = reader[5].ToString(); // **Not in use yet**
+                                label4.Text = msid;
+                                label6.Text = lastlocation;
+                                label9.Text = InOutStatus;
 
-                                    return;
-                                }
-                                else if (lastlocation != initialstate)
+                                // This if/else check user department and the posible Workorder can pass to this user deparment
+                                if (initialstate == "Planning")
                                 {
-                                    isCheck = true;
-                                    label3.Text = "New MasterCard Come In, Doing Check-In...";
-                                    label3.ForeColor = System.Drawing.Color.Red;
-                                    label4.Text = msid; 
-                                }
-                            } 
-                            else if (initialstate == "Extrusion")
-                            {
-                                // This if/else check the mastercard last location and compare with current location to let user know is mastercard here or will update to here
-                                if (msid != "" && lastlocation == initialstate && pono == woid)
-                                {
-                                    label3.Text = "MasterCard Already Here.";
-                                    label3.ForeColor = System.Drawing.Color.Green;
+                                    if (msid != "" && lastlocation == initialstate && pono == woid)
+                                    {
+                                        if(InOutStatus == "IN")
+                                        {
+                                            // -- Prompt Message Box on Reuse Matercard that already on planner hand, *Prevent mistake on forget check-in double scan
+                                            //DialogResult dialogResult = MessageBox.Show("Reuse Mastercard for New Workorder?", "Confirmation", MessageBoxButtons.YesNo);
+                                            //if (dialogResult == DialogResult.Yes)
+                                            //{
+                                            //    saveHistory(msid, woid, item, initialstate, "OUT", true, 300);
+                                            //}
+                                            //else if (dialogResult == DialogResult.No)
+                                            //{
+                                            //    label3.Text = "MasterCard Already Here.";
+                                            //    label3.ForeColor = System.Drawing.Color.Green;
 
-                                    return;
+                                            //    return;
+                                            //}
+
+                                            // -- Roll Back: No Prompt on reuse mastercard. *User need to remember which workorder already scanned, double scan will check out the Mastercard
+                                            // -- Solution On Mistake Double Scan making MSC OUT: Just scan the workorder again, to return the MSC.
+                                            saveHistory(msid, woid, item, initialstate, "OUT", true, 300);
+                                        } 
+                                        else 
+                                        {
+                                            saveHistory(msid, woid, item, initialstate, "IN", true, 300);
+                                        }
+                                    }
+                                    else if (lastlocation != initialstate)
+                                    {
+                                        DialogResult dialogResult = MessageBox.Show("Mastercard Using In Production Line, Do you Want To Return Matercard?", "Confirmation", MessageBoxButtons.YesNo);
+                                        if (dialogResult == DialogResult.Yes)
+                                        {
+                                            isCheck = true;
+                                            label3.Text = "New MasterCard Come In, Doing Check-In...";
+                                            label3.ForeColor = System.Drawing.Color.Red;
+                                            label4.Text = msid;
+                                        }
+                                        else if (dialogResult == DialogResult.No)
+                                        {
+                                            label3.Text = "MasterCard Still Using in " + lastlocation;
+                                            label3.ForeColor = System.Drawing.Color.Green;
+
+                                            return;
+                                        }
+                                    }
                                 }
-                                else if (lastlocation != initialstate)
+                                else if (initialstate == "Extrusion")
                                 {
-                                    isCheck = true;
-                                    label3.Text = "New MasterCard Come In, Doing Check-In...";
+                                    // This if/else check the mastercard last location and compare with current location to let user know is mastercard here or will update to here
+                                    if (msid != "" && lastlocation == initialstate && pono == woid)
+                                    {
+                                        label3.Text = "MasterCard Already Here.";
+                                        label3.ForeColor = System.Drawing.Color.Green;
+
+                                        return;
+                                    }
+                                    else if (lastlocation != initialstate)
+                                    {
+                                        isCheck = true;
+                                        label3.Text = "New MasterCard Come In, Doing Check-In...";
+                                        label3.ForeColor = System.Drawing.Color.Red;
+                                        label4.Text = msid;
+                                    }
+                                }
+                                else if (initialstate == "Printing")
+                                {
+                                    if (msid != "" && lastlocation == initialstate && pono == woid)
+                                    {
+                                        label3.Text = "MasterCard Already Here.";
+                                        label3.ForeColor = System.Drawing.Color.Green;
+
+                                        return;
+                                    }
+                                    else if (lastlocation != initialstate)
+                                    {
+                                        isCheck = true;
+                                        label3.Text = "New MasterCard Come In, Doing Check-In...";
+                                        label3.ForeColor = System.Drawing.Color.Red;
+                                        label4.Text = msid;
+                                    }
+                                }
+                                else if (initialstate == "Cutting")
+                                {
+                                    if (msid != "" && lastlocation == initialstate && pono == woid)
+                                    {
+                                        label3.Text = "MasterCard Already Here.";
+                                        label3.ForeColor = System.Drawing.Color.Green;
+
+                                        return;
+                                    }
+                                    else if (lastlocation != initialstate)
+                                    {
+                                        isCheck = true;
+                                        label3.Text = "New MasterCard Come In, Doing Check-In...";
+                                        label3.ForeColor = System.Drawing.Color.Red;
+                                        label4.Text = msid;
+                                    }
+                                }
+                                else
+                                {
+                                    label3.Text = "MasterCard Doesn't Have This Process";
                                     label3.ForeColor = System.Drawing.Color.Red;
-                                    label4.Text = msid;
                                 }
                             }
-                            else if (initialstate == "Printing")
-                            {
-                                if (msid != "" && lastlocation == initialstate && pono == woid)
-                                {
-                                    label3.Text = "MasterCard Already Here.";
-                                    label3.ForeColor = System.Drawing.Color.Green;
+                        }
 
-                                    return;
-                                }
-                                else if (lastlocation != initialstate)
-                                {
-                                    isCheck = true;
-                                    label3.Text = "New MasterCard Come In, Doing Check-In...";
-                                    label3.ForeColor = System.Drawing.Color.Red;
-                                    label4.Text = msid;
-                                }
-                            }
-                            else if (initialstate == "Cutting")
+                        if (!reader.HasRows)
+                        {
+                            // It check the master record for any result, new wo will not be in master record. Then trigger this
+                            // If is new workorder pass down to production, this function run and record
+                            if (initialstate == "Planning")
                             {
-                                if (msid != "" && lastlocation == initialstate && pono == woid)
-                                {
-                                    label3.Text = "MasterCard Already Here.";
-                                    label3.ForeColor = System.Drawing.Color.Green;
-
-                                    return;
-                                }
-                                else if (lastlocation != initialstate)
-                                {
-                                    isCheck = true;
-                                    label3.Text = "New MasterCard Come In, Doing Check-In...";
-                                    label3.ForeColor = System.Drawing.Color.Red;
-                                    label4.Text = msid;
-                                }
+                                getNewWoDataAndSave(pono, item, true);
                             }
                             else
                             {
-                                label3.Text = "MasterCard Doesn't Have This Process";
-                                label3.ForeColor = System.Drawing.Color.Red;
+                                getNewWoDataAndSave(pono, item, false);
                             }
-                        }
-                    } 
 
-                    if (!reader.HasRows)
-                    {
-                        // Console.WriteLine("Trigger new save?");
-                        // It check the master record for any result, new wo will not be in master record. Then trigger this
-                        // If is new workorder pass down to production, this function run and record
-                        getNewWoDataAndSave(pono, item);
-                        return;
+                            return;
+                        }
+
+                        reader.Close();
                     }
 
-                    reader.Close();
+                    conn.Close();
+
+                    if (isCheck == true)
+                    {
+                        if (lastlocation != "Planning")
+                        {
+                            saveHistory(msid, woid, item, initialstate, "IN", true, 500);
+                            saveHistory(msid, woid, item, lastlocation, "OUT", true, 300);
+                        }
+                        else
+                        {
+                            saveHistory(msid, woid, item, initialstate, "IN", true, 500);
+                        }
+                    }
+
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(string.Format("An error occurred {0}", ex.Message), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                finally
+                {
                     conn.Close();
                 }
-
-                if(isCheck == true)
-                {
-                    //Console.WriteLine("Trigger Save In Out");
-                    saveHistory(msid, woid, item, initialstate, "IN", true, 500);
-                    saveHistory(msid, woid, item, lastlocation, "OUT", true, 300);                                     
-                }
-
-                return;
-            }
-            catch (Exception ex)
+            } catch (Exception ex)
             {
-                MessageBox.Show(string.Format("An error occurred {0}", ex.Message), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            finally
-            {
-                conn.Close();
-            }
-
-            
+                MessageBox.Show(string.Format("Invalid Workoreder No"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }      
         }
 
-        public async void getNewWoDataAndSave(string pono, string item)
+        public async void getNewWoDataAndSave(string pono, string item, bool isError)
         {
             await Task.Delay(300);
-
-            // string item = splitted[1];
 
             // Get PO and mastercard No
             string query = "SELECT plastic.wo.PO, plastic.masterc.mascNo " +
@@ -271,7 +319,15 @@ namespace MasterCardTracker
                 }
                 conn.Close();
 
-                saveHistory(msid, woid, item, initialstate, "IN", true, 500);
+                if(!isError)
+                {
+                    MessageBox.Show(string.Format("This Workorder Haven't Pass Down By Planner! Please Return It."), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    saveHistory(msid, woid, item, initialstate, "Invalid", false, 500);
+                }
+                else
+                {
+                    saveHistory(msid, woid, item, initialstate, "OUT", true, 500);
+                }
 
                 return;
             }
@@ -289,6 +345,8 @@ namespace MasterCardTracker
         {
             // Delay This task for last task to complete sql read and connection to close *Testing Beta
             //await Task.Delay(TimeSpan.FromSeconds(2));
+
+            conn.Close();
 
             dt.Clear();
             dgv1.Refresh();
@@ -349,33 +407,46 @@ namespace MasterCardTracker
 
                 if (textBox1.Text != "" )
                 {
-                    try
-                    {
-                        var splitted = textBox1.Text.Split('-');
-                        string pono = splitted[0];
-                        string item = splitted[1];
-
-                        timer.Dispose();
-                        //loaddata(pono);
-
-                        // Query to check is the wo/master card have this process
-                        string woprocesssql = "SELECT plastic.wo.PO, plastic.parat.code, plastic.masterc.mascNo, plastic.woplan.hideBy " +
-                                              "FROM plastic.wo " +
-                                              "LEFT JOIN plastic.masterc ON plastic.wo.MASCID = plastic.masterc.ID " +
-                                              "LEFT JOIN plastic.woplan ON plastic.wo.MASCID = plastic.woplan.mascid " +
-                                              "LEFT JOIN plastic.woitem ON plastic.wo.ID = plastic.woitem.woId " +
-                                              "LEFT JOIN plastic.planwoprocess ON plastic.wo.MASCID = plastic.planwoprocess.mascid " +
-                                              "LEFT JOIN plastic.parat ON plastic.planwoprocess.paratId = plastic.parat.id " +
-                                              "WHERE plastic.wo.PO = '" + pono + "' AND plastic.woitem.item = '" + item + "' ";
-                                              //"AND plastic.woplan.hideBy = '0' ";
-
-                        getAllWoProcess(woprocesssql, item);
-                    }
-                    catch (Exception)
+                    // Ignore check step, if new workorder with mastercard scan by planner
+                    if (initialstate == "Planning")
                     {
                         timer.Dispose();
-                        MessageBox.Show(string.Format("Invalid Workoreder Or This Workorder is completed"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
+
+                        getWOData();
+                    } 
+                    else
+                    {
+                        try
+                        {
+                            var splitted = textBox1.Text.Split('-');
+                            string pono = splitted[0];
+                            string item = splitted[1];
+
+                            timer.Dispose();
+                            //loaddata(pono);
+
+                            // Query to check is the wo/master card have this process
+                            string woprocesssql = "SELECT plastic.wo.PO, plastic.parat.code, plastic.masterc.mascNo, plastic.woplan.hideBy " +
+                                                  "FROM plastic.wo " +
+                                                  "LEFT JOIN plastic.masterc ON plastic.wo.MASCID = plastic.masterc.ID " +
+                                                  "LEFT JOIN plastic.woplan ON plastic.wo.MASCID = plastic.woplan.mascid " +
+                                                  "LEFT JOIN plastic.woitem ON plastic.wo.ID = plastic.woitem.woId " +
+                                                  "LEFT JOIN plastic.planwoprocess ON plastic.wo.MASCID = plastic.planwoprocess.mascid " +
+                                                  "LEFT JOIN plastic.parat ON plastic.planwoprocess.paratId = plastic.parat.id " +
+                                                  "WHERE plastic.wo.PO = '" + pono + "' AND plastic.woitem.item = '" + item + "' ";
+                            //"AND plastic.woplan.hideBy = '0' ";                      
+
+
+
+                            getAllWoProcess(woprocesssql, item);
+
+                        }
+                        catch (Exception)
+                        {
+                            timer.Dispose();
+                            MessageBox.Show(string.Format("Invalid Workoreder Or This Workorder is completed"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }                 
                 }
             }
             ));
@@ -507,13 +578,6 @@ namespace MasterCardTracker
                 termsList.Clear();
                 termsList.Add("CUT");
                 termsList.Add("SLIT");
-            }
-
-            // Last or Return Mastercard to Admin/Planner/CS, just record the info.
-            if (initialstate == "Planning")
-            {
-                saveHistory(masc, wopo, itemno, initialstate, "IN", true, 300);
-                return;
             }
 
             stepInDepart = termsList.ToArray();
