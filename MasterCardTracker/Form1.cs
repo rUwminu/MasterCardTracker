@@ -27,7 +27,8 @@ namespace MasterCardTracker
         // string initialstate = "Extrusion";
         // string initialstate = "Printing";
         // string initialstate = "Cutting";
-         string initialstate = "Planning";
+        // string initialstate = "Planning";
+        string initialstate = "SomeRandom";
 
         static int VALIDATION_DELAY = 1500;
         System.Threading.Timer timer = null;
@@ -186,7 +187,23 @@ namespace MasterCardTracker
 
                                         return;
                                     }
-                                    else if (lastlocation != initialstate)
+                                    else if (lastlocation != initialstate && lastlocation != "Planning")
+                                    {
+                                        isCheck = true;
+                                        label3.Text = "New MasterCard Come In, Doing Check-In...";
+                                        label3.ForeColor = System.Drawing.Color.Red;
+                                        label4.Text = msid;
+                                    } 
+                                    else if (lastlocation == "Planning" && InOutStatus == "IN")
+                                    {
+                                        label3.Text = "Planner Not Checkout Yet";
+                                        label3.ForeColor = System.Drawing.Color.Red;
+
+                                        MessageBox.Show(string.Format("Matercard Not Checkout By Planner"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                                        return;
+                                    }
+                                    else if (lastlocation == "Planning" && InOutStatus == "OUT")
                                     {
                                         isCheck = true;
                                         label3.Text = "New MasterCard Come In, Doing Check-In...";
@@ -203,7 +220,23 @@ namespace MasterCardTracker
 
                                         return;
                                     }
-                                    else if (lastlocation != initialstate)
+                                    else if (lastlocation != initialstate && lastlocation != "Planning")
+                                    {
+                                        isCheck = true;
+                                        label3.Text = "New MasterCard Come In, Doing Check-In...";
+                                        label3.ForeColor = System.Drawing.Color.Red;
+                                        label4.Text = msid;
+                                    }
+                                    else if (lastlocation == "Planning" && InOutStatus == "IN")
+                                    {
+                                        label3.Text = "Planner Not Checkout Yet";
+                                        label3.ForeColor = System.Drawing.Color.Red;
+
+                                        MessageBox.Show(string.Format("Matercard Not Checkout By Planner"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                                        return;
+                                    }
+                                    else if (lastlocation == "Planning" && InOutStatus == "OUT")
                                     {
                                         isCheck = true;
                                         label3.Text = "New MasterCard Come In, Doing Check-In...";
@@ -220,7 +253,23 @@ namespace MasterCardTracker
 
                                         return;
                                     }
-                                    else if (lastlocation != initialstate)
+                                    else if (lastlocation != initialstate && lastlocation != "Planning")
+                                    {
+                                        isCheck = true;
+                                        label3.Text = "New MasterCard Come In, Doing Check-In...";
+                                        label3.ForeColor = System.Drawing.Color.Red;
+                                        label4.Text = msid;
+                                    }
+                                    else if (lastlocation == "Planning" && InOutStatus == "IN")
+                                    {
+                                        label3.Text = "Planner Not Checkout Yet";
+                                        label3.ForeColor = System.Drawing.Color.Red;
+
+                                        MessageBox.Show(string.Format("Matercard Not Checkout By Planner"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                                        return;
+                                    }
+                                    else if (lastlocation == "Planning" && InOutStatus == "OUT")
                                     {
                                         isCheck = true;
                                         label3.Text = "New MasterCard Come In, Doing Check-In...";
@@ -230,7 +279,7 @@ namespace MasterCardTracker
                                 }
                                 else
                                 {
-                                    label3.Text = "MasterCard Doesn't Have This Process";
+                                    label3.Text = "You Are Not Person Involve In Process. ";
                                     label3.ForeColor = System.Drawing.Color.Red;
                                 }
                             }
@@ -414,7 +463,7 @@ namespace MasterCardTracker
 
                         getWOData();
                     } 
-                    else
+                    else if(initialstate == "Extrusion" || initialstate == "Printing" || initialstate == "Cutting")
                     {
                         try
                         {
@@ -446,7 +495,18 @@ namespace MasterCardTracker
                             timer.Dispose();
                             MessageBox.Show(string.Format("Invalid Workoreder Or This Workorder is completed"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
-                    }                 
+                    }  
+                    else
+                    {
+                        timer.Dispose();
+
+                        label3.Text = "You Are Not Person Involve In Process. ";
+                        label3.ForeColor = System.Drawing.Color.Red;
+
+                        MessageBox.Show(string.Format("Mastercard don't have any process involve with your department. If you want to check the Mastercard history or job, please tab on the button on right."), "Not Person Involve", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                        return;
+                    }
                 }
             }
             ));
