@@ -27,8 +27,8 @@ namespace MasterCardTracker
         // string initialstate = "Extrusion";
         // string initialstate = "Printing";
         // string initialstate = "Cutting";
-        // string initialstate = "Planning";
-        string initialstate = "SomeRandom";
+         string initialstate = "Planning";
+        // string initialstate = "SomeRandom";
 
         static int VALIDATION_DELAY = 1500;
         System.Threading.Timer timer = null;
@@ -160,21 +160,10 @@ namespace MasterCardTracker
                                     }
                                     else if (lastlocation != initialstate)
                                     {
-                                        DialogResult dialogResult = MessageBox.Show("Mastercard Using In Production Line, Do you Want To Return Matercard?", "Confirmation", MessageBoxButtons.YesNo);
-                                        if (dialogResult == DialogResult.Yes)
-                                        {
-                                            isCheck = true;
-                                            label3.Text = "New MasterCard Come In, Doing Check-In...";
-                                            label3.ForeColor = System.Drawing.Color.Red;
-                                            label4.Text = msid;
-                                        }
-                                        else if (dialogResult == DialogResult.No)
-                                        {
-                                            label3.Text = "MasterCard Still Using in " + lastlocation;
-                                            label3.ForeColor = System.Drawing.Color.Green;
-
-                                            return;
-                                        }
+                                        isCheck = true;
+                                        label3.Text = "New MasterCard Come In, Doing Check-In...";
+                                        label3.ForeColor = System.Drawing.Color.Red;
+                                        label4.Text = msid;
                                     }
                                 }
                                 else if (initialstate == "Extrusion")
