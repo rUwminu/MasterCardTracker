@@ -457,8 +457,23 @@ namespace MasterCardTracker
                         try
                         {
                             var splitted = textBox1.Text.Split('-');
-                            string pono = splitted[0];
-                            string item = splitted[1];
+
+                            string pono;
+                            string item;
+
+                            pono = splitted[0];
+
+                            if (1 < splitted.Length)
+                            {
+                                item = splitted[0];
+                            }
+                            else
+                            {
+                                timer.Dispose();
+
+                                MessageBox.Show(string.Format("Invalid Workoreder Or This Workorder is completed"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                return;
+                            }
 
                             timer.Dispose();
                             //loaddata(pono);
